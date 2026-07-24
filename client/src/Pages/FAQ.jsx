@@ -67,7 +67,7 @@ export default function FAQ() {
       <div className="mt-16 border border-line p-8 text-center">
         <p className="font-display text-2xl">Still have a question?</p>
         <p className="mt-2 text-muted">Our team is happy to help.</p>
-        <Link to="/contact" className="mt-6 inline-block bg-ink px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay">
+        <Link to="/contact" className="mt-6 inline-block bg-ink px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid">
           Contact us
         </Link>
       </div>

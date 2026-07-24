@@ -56,7 +56,9 @@ const orderSchema = new mongoose.Schema(
 );
 
 // Assign a sequential, zero-padded order number before the first save.
-orderSchema.pre('save', async function (next) {
+// Async pre-save hook: Mongoose does not pass `next` to async middleware, so
+// we resolve the promise instead of calling next().
+orderSchema.pre('save', async function () {
   if (this.isNew && !this.orderNumber) {
     const count = await this.constructor.countDocuments();
     this.orderNumber = `AT-${String(count + 1).padStart(6, '0')}`;

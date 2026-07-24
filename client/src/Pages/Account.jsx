@@ -153,7 +153,7 @@ function Profile({ profile, refresh }) {
         <label className={labelCls}>New password</label>
         <input type="password" placeholder="Leave blank to keep current" className={inputCls} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
       </div>
-      <button type="submit" disabled={saving} className="bg-ink px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-bone hover:bg-clay disabled:opacity-50">
+      <button type="submit" disabled={saving} className="bg-ink px-8 py-3.5 text-xs font-semibold uppercase tracking-[0.16em] text-bone btn-solid disabled:opacity-50">
         {saving ? "Saving…" : "Save changes"}
       </button>
     </form>
@@ -227,12 +227,12 @@ function Addresses({ profile, refresh }) {
             Set as default
           </label>
           <div className="flex gap-3">
-            <button type="submit" className="bg-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-bone hover:bg-clay">Save address</button>
+            <button type="submit" className="bg-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-bone btn-solid">Save address</button>
             <button type="button" onClick={() => setAdding(false)} className="text-xs uppercase tracking-[0.14em] text-muted hover:text-ink">Cancel</button>
           </div>
         </form>
       ) : (
-        <button onClick={() => setAdding(true)} className="mt-6 border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] hover:bg-ink hover:text-bone">
+        <button onClick={() => setAdding(true)} className="mt-6 border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] btn-line">
           Add address
         </button>
       )}

@@ -77,10 +77,10 @@ export default function OrderConfirmation() {
       )}
 
       <div className="mt-10 flex flex-wrap justify-center gap-4">
-        <Link to="/products" className="bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay">
+        <Link to="/products" className="bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid">
           Continue shopping
         </Link>
-        <Link to="/account" className="border border-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] hover:bg-ink hover:text-bone">
+        <Link to="/account" className="border border-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] btn-line">
           View my orders
         </Link>
       </div>

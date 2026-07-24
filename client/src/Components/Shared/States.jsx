@@ -45,7 +45,7 @@ export function EmptyState({ title, message, action }) {
       {action && (
         <Link
           to={action.to}
-          className="mt-8 inline-block border border-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-colors hover:bg-ink hover:text-bone"
+          className="mt-8 inline-block border border-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] btn-line"
         >
           {action.label}
         </Link>
@@ -64,7 +64,7 @@ export function ErrorState({ message = "We couldn't load this right now.", onRet
       {onRetry && (
         <button
           onClick={onRetry}
-          className="mt-8 inline-block border border-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-colors hover:bg-ink hover:text-bone"
+          className="mt-8 inline-block border border-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] btn-line"
         >
           Try again
         </button>

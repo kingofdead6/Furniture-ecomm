@@ -75,7 +75,7 @@ export default function AboutPage() {
       <section className="border-t border-line">
         <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-5 py-20 md:flex-row md:items-center md:justify-between md:px-8">
           <h2 className="display text-[clamp(2rem,5vw,3.5rem)]">See what we've made.</h2>
-          <Link to="/products" className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay">
+          <Link to="/products" className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid">
             Shop the collection
           </Link>
         </div>

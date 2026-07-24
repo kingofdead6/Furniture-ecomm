@@ -77,7 +77,7 @@ export default function ContactPage() {
             <p className="eyebrow text-clay">Message received</p>
             <h2 className="display mt-3 text-3xl">Thank you.</h2>
             <p className="mt-3 text-muted">We've got your message and will reply shortly.</p>
-            <button onClick={() => setSent(false)} className="mt-8 border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] hover:bg-ink hover:text-bone">
+            <button onClick={() => setSent(false)} className="mt-8 border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] btn-line">
               Send another
             </button>
           </div>
@@ -110,7 +110,7 @@ export default function ContactPage() {
             <button
               type="submit"
               disabled={sending}
-              className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay disabled:opacity-50"
+              className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid disabled:opacity-50"
             >
               {sending ? "Sending…" : "Send message"}
             </button>
