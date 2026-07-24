@@ -15,8 +15,9 @@ import {
   deleteAddress,
   getWishlist,
   toggleWishlist,
+  getCustomers,
 } from '../Controllers/auth.js';
-import { protect, superadmin } from '../Middleware/auth.js';
+import { protect, superadmin, admin } from '../Middleware/auth.js';
 
 const router = express.Router();
 
@@ -33,6 +34,9 @@ router.put('/me/addresses/:addressId', protect, updateAddress);
 router.delete('/me/addresses/:addressId', protect, deleteAddress);
 router.get('/me/wishlist', protect, getWishlist);
 router.post('/me/wishlist', protect, toggleWishlist);
+
+// Admin — customer directory
+router.get('/customers', protect, admin, getCustomers);
 
 // Superadmin — staff management
 router.post('/register', protect, superadmin, registerUser);

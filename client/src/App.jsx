@@ -26,15 +26,19 @@ import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import NotFound from "./Pages/NotFound";
 
+import AdminLayout from "./Components/Admin/AdminLayout";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminProducts from "./Components/Admin/AdminProducts";
 import AdminCategories from "./Components/Admin/AdminCategories";
+import AdminCollections from "./Components/Admin/AdminCollections";
+import AdminCoupons from "./Components/Admin/AdminCoupons";
+import AdminCustomers from "./Components/Admin/AdminCustomers";
 import AdminDeliveryAreas from "./Components/Admin/AdminDeliveryAreas";
 import AdminUsers from "./Components/Admin/AdminUsers";
 import AdminOrders from "./Components/Admin/AdminOrders";
 import AdminContactMessages from "./Components/Admin/AdminContactMessages.jsx";
 
-// Slow, quiet cross-fade + lift between pages.
+// Slow, quiet cross-fade + lift between storefront pages.
 function Page({ children }) {
   return (
     <motion.div
@@ -48,43 +52,38 @@ function Page({ children }) {
   );
 }
 
-function AnimatedRoutes() {
+// The public storefront shell — header, animated pages, footer.
+function Storefront() {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Page><HomePage /></Page>} />
-        <Route path="/products" element={<Page><Shop /></Page>} />
-        <Route path="/products/:id" element={<Page><ProductDetail /></Page>} />
-        <Route path="/search" element={<Page><SearchPage /></Page>} />
-        <Route path="/collections" element={<Page><CollectionsPage /></Page>} />
-        <Route path="/collections/:slug" element={<Page><CollectionDetail /></Page>} />
-        <Route path="/cart" element={<Page><CartPage /></Page>} />
-        <Route path="/checkout" element={<Page><Checkout /></Page>} />
-        <Route path="/order/:id" element={<Page><OrderConfirmation /></Page>} />
-        <Route path="/wishlist" element={<Page><Wishlist /></Page>} />
-        <Route path="/about" element={<Page><AboutPage /></Page>} />
-        <Route path="/contact" element={<Page><ContactPage /></Page>} />
-        <Route path="/faq" element={<Page><FAQ /></Page>} />
-        <Route path="/shipping-returns" element={<Page><ShippingReturns /></Page>} />
-        <Route path="/account" element={<Page><Account /></Page>} />
-        <Route path="/login" element={<Page><Login /></Page>} />
-        <Route path="/register" element={<Page><Register /></Page>} />
-
-        {/* Admin */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/categories" element={<AdminCategories />} />
-          <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/contacts" element={<AdminContactMessages />} />
-        </Route>
-
-        <Route path="*" element={<Page><NotFound /></Page>} />
-      </Routes>
-    </AnimatePresence>
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Page><HomePage /></Page>} />
+            <Route path="/products" element={<Page><Shop /></Page>} />
+            <Route path="/products/:id" element={<Page><ProductDetail /></Page>} />
+            <Route path="/search" element={<Page><SearchPage /></Page>} />
+            <Route path="/collections" element={<Page><CollectionsPage /></Page>} />
+            <Route path="/collections/:slug" element={<Page><CollectionDetail /></Page>} />
+            <Route path="/cart" element={<Page><CartPage /></Page>} />
+            <Route path="/checkout" element={<Page><Checkout /></Page>} />
+            <Route path="/order/:id" element={<Page><OrderConfirmation /></Page>} />
+            <Route path="/wishlist" element={<Page><Wishlist /></Page>} />
+            <Route path="/about" element={<Page><AboutPage /></Page>} />
+            <Route path="/contact" element={<Page><ContactPage /></Page>} />
+            <Route path="/faq" element={<Page><FAQ /></Page>} />
+            <Route path="/shipping-returns" element={<Page><ShippingReturns /></Page>} />
+            <Route path="/account" element={<Page><Account /></Page>} />
+            <Route path="/login" element={<Page><Login /></Page>} />
+            <Route path="/register" element={<Page><Register /></Page>} />
+            <Route path="*" element={<Page><NotFound /></Page>} />
+          </Routes>
+        </AnimatePresence>
+      </main>
+      <Footer />
+    </div>
   );
 }
 
@@ -104,13 +103,26 @@ export default function App() {
           },
         }}
       />
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex-1">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-      </div>
+      <Routes>
+        {/* Admin — own layout shell, gated by role */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/collections" element={<AdminCollections />} />
+            <Route path="/admin/categories" element={<AdminCategories />} />
+            <Route path="/admin/coupons" element={<AdminCoupons />} />
+            <Route path="/admin/customers" element={<AdminCustomers />} />
+            <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/contacts" element={<AdminContactMessages />} />
+          </Route>
+        </Route>
+
+        {/* Everything else — the public storefront */}
+        <Route path="*" element={<Storefront />} />
+      </Routes>
     </Router>
   );
 }

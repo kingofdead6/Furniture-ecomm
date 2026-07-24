@@ -189,6 +189,25 @@ export const registerUser = asyncHandler(async (req, res) => {
   res.status(201).json({ id: user._id, name, email, usertype });
 });
 
+// Get all customers with order counts (admin) — for the admin Customers view.
+export const getCustomers = asyncHandler(async (req, res) => {
+  const Order = (await import('../Models/Order.js')).default;
+  const customers = await User.find({ usertype: 'user' }).select('-password').sort({ createdAt: -1 }).lean();
+  // Attach a lightweight order count/spend per customer.
+  const stats = await Order.aggregate([
+    { $match: { customer: { $ne: null } } },
+    { $group: { _id: '$customer', orders: { $sum: 1 }, spent: { $sum: '$totalPrice' } } },
+  ]);
+  const byId = Object.fromEntries(stats.map((s) => [String(s._id), s]));
+  res.json(
+    customers.map((c) => ({
+      ...c,
+      orderCount: byId[String(c._id)]?.orders || 0,
+      totalSpent: byId[String(c._id)]?.spent || 0,
+    }))
+  );
+});
+
 // Get all users (superadmin only)
 export const getUsers = asyncHandler(async (req, res) => {
   console.log('Fetching all users');

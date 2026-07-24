@@ -1,140 +1,97 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { jwtDecode } from "jwt-decode";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { api, apiError } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
+import { formatPrice, formatDate } from "../../lib/format";
+import { PageHeader, StatCard, Table, Row, Cell, StatusBadge, TableSkeleton, AdminError } from "./ui";
 
-const ADMIN_SECTIONS = [
-  { path: "/admin/orders", title: "Manage Orders", description: "View and update order statuses" },
-  { path: "/admin/products", title: "Manage Products", description: "Create, edit and delete products" },
-  { path: "/admin/contacts", title: "Contact Messages", description: "Manage user contact messages" },
-];
-
-const SUPERADMIN_EXTRA = [
-  { path: "/admin/users", title: "Manage Users", description: "Create, edit and delete admin accounts" },
-  { path: "/admin/categories", title: "Categories", description: "Add and manage product categories" },
-  { path: "/admin/delivery-areas", title: "Delivery Areas", description: "Add and update delivery prices by wilaya" },
-];
+const STATUS_LABEL = {
+  pending: "Pending", confirmed: "Confirmed", in_delivery: "Out for delivery",
+  reached: "Delivered", canceled: "Canceled",
+};
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
-  const [userType, setUserType] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { usertype } = useAuth();
+  const superAdmin = usertype === "superadmin";
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (!token) {
-      toast.error("Please sign in to access the dashboard.");
-      navigate("/login");
-      return;
-    }
-    try {
-      const decoded = jwtDecode(token);
-      if (decoded.usertype === "admin" || decoded.usertype === "superadmin") {
-        setUserType(decoded.usertype);
-      } else {
-        toast.error("Unauthorized access.");
-        navigate("/login");
-      }
-    } catch {
-      toast.error("Invalid token. Please sign in again.");
-      navigate("/login");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    toast.success("Logged out successfully.");
-    navigate("/login");
+  const load = () => {
+    setLoading(true);
+    setError(false);
+    const calls = [api.get("/orders"), api.get("/products", { params: { status: "all", limit: 60 } })];
+    if (superAdmin) calls.push(api.get("/auth/customers"));
+    Promise.all(calls)
+      .then(([o, p, c]) => {
+        setData({ orders: o.data || [], products: p.data.products || [], customers: c?.data || [] });
+      })
+      .catch((err) => setError(apiError(err)))
+      .finally(() => setLoading(false));
   };
 
-  const sections = userType === "superadmin"
-    ? [...ADMIN_SECTIONS, ...SUPERADMIN_EXTRA]
-    : ADMIN_SECTIONS;
+  useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (isLoading) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "#94A3B8", fontSize: 20 }}>Loading dashboard...</p>
-      </div>
-    );
-  }
+  if (error) return <><PageHeader eyebrow="Admin" title="Overview" /><AdminError message={error} onRetry={load} /></>;
+
+  const orders = data?.orders || [];
+  const products = data?.products || [];
+  const revenue = orders.filter((o) => o.status !== "canceled").reduce((s, o) => s + (o.totalPrice || 0), 0);
+  const pending = orders.filter((o) => o.status === "pending").length;
+  const lowStock = products.filter((p) => (p.stock ?? 0) <= 5).length;
 
   return (
-    <motion.section
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.7 }}
-      style={{ minHeight: "100vh", padding: "80px 24px 60px" }}
-    >
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <motion.h1
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: "easeOut" }}
-            style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(36px,6vw,72px)", letterSpacing: "-.03em", color: "#fff", margin: 0 }}
-          >
-            {userType === "superadmin" ? "Super Admin" : "Admin Dashboard"}
-          </motion.h1>
-        </div>
+    <div>
+      <PageHeader eyebrow="Admin" title="Overview" />
 
-        {/* Grid */}
-        <motion.div
-          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 28 }}
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
-          {sections.map((section, index) => (
-            <motion.div
-              key={section.path}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              whileHover={{ y: -8, scale: 1.02 }}
-            >
-              <Link to={section.path} style={{ textDecoration: "none" }}>
-                <div style={{ background: "rgba(15,23,42,.8)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, padding: "36px 28px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", backdropFilter: "blur(16px)", transition: "border-color .25s", boxSizing: "border-box" }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = "rgb(var(--secondary-rgb) / .4)"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"}
-                >
-                  <div>
-                    <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: "0 0 12px" }}>
-                      {section.title}
-                    </h2>
-                    <p style={{ fontSize: 15, color: "#94A3B8", lineHeight: 1.6, margin: 0 }}>
-                      {section.description}
-                    </p>
-                  </div>
-                  <div style={{ marginTop: 28, display: "flex", justifyContent: "flex-end" }}>
-                    <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 13, fontWeight: 600, color: "var(--secondary)", letterSpacing: ".04em" }}>
-                      MANAGE →
-                    </span>
-                  </div>
+      {loading ? (
+        <TableSkeleton rows={2} cols={4} />
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label="Revenue" value={formatPrice(revenue)} sub={`${orders.length} orders total`} />
+            <StatCard label="Pending orders" value={pending} sub="Awaiting confirmation" />
+            <StatCard label="Products" value={products.length} sub={`${lowStock} low on stock`} />
+            <StatCard label="Customers" value={superAdmin ? data.customers.length : "—"} sub={superAdmin ? "Registered accounts" : "Superadmin only"} />
+          </div>
+
+          {/* Status breakdown */}
+          <div className="mt-10">
+            <p className="eyebrow mb-4">Orders by status</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+              {Object.keys(STATUS_LABEL).map((s) => (
+                <div key={s} className="border border-line p-4 text-center">
+                  <p className="font-display text-3xl">{orders.filter((o) => o.status === s).length}</p>
+                  <p className="mt-1 text-[11px] uppercase tracking-wide text-muted">{STATUS_LABEL[s]}</p>
                 </div>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+              ))}
+            </div>
+          </div>
 
-        {/* Logout */}
-        <div style={{ marginTop: 60, textAlign: "center" }}>
-          <button
-            onClick={handleLogout}
-            style={{ padding: "14px 40px", background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", color: "#fca5a5", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, borderRadius: 14, cursor: "pointer", transition: "all .25s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,.25)"; e.currentTarget.style.borderColor = "rgba(239,68,68,.5)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,.15)"; e.currentTarget.style.borderColor = "rgba(239,68,68,.3)"; }}
-          >
-            Sign Out
-          </button>
-        </div>
-      </div>
-    </motion.section>
+          {/* Recent orders */}
+          <div className="mt-10">
+            <div className="mb-4 flex items-center justify-between">
+              <p className="eyebrow">Recent orders</p>
+              <Link to="/admin/orders" className="link-underline text-xs font-semibold uppercase tracking-[0.14em]">All orders</Link>
+            </div>
+            {orders.length === 0 ? (
+              <p className="border border-dashed border-line py-12 text-center text-muted">No orders yet.</p>
+            ) : (
+              <Table head={["Order", "Customer", "Date", "Total", "Status"]}>
+                {orders.slice(0, 6).map((o) => (
+                  <Row key={o._id}>
+                    <Cell className="font-display text-base">{o.orderNumber}</Cell>
+                    <Cell>{o.customerName}</Cell>
+                    <Cell className="text-muted">{formatDate(o.createdAt)}</Cell>
+                    <Cell>{formatPrice(o.totalPrice)}</Cell>
+                    <Cell><StatusBadge status={o.status} label={STATUS_LABEL[o.status]} /></Cell>
+                  </Row>
+                ))}
+              </Table>
+            )}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
