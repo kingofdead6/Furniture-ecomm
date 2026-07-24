@@ -4,9 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF, ContactShadows, OrbitControls } from "@react-three/drei";
 import { store } from "../../store.config.js";
 // Factory always writes the niche model to this exact path:
-import heroModel from "../../assets/hero-model.glb";
 
-useGLTF.preload(heroModel);
 
 /* ── read brand colors from CSS vars so 3D lighting matches the theme ── */
 function useThemeColors() {
@@ -45,24 +43,7 @@ function ModelFallback() {
 }
 
 /* ── the model: niche-agnostic, transform comes from store.config ── */
-function HeroModel({ isInteracting }) {
-  const { scene } = useGLTF(heroModel);
-  const ref = useRef();
 
-  const scale    = store.hero?.modelScale    ?? 2.4;
-  const position = store.hero?.modelPosition  ?? [0, 0, 0];
-  const rotation = store.hero?.modelRotation  ?? [-0.08, 0, 0];
-  const spin     = store.hero?.autoRotate     ?? 0.35; // set 0 to disable idle spin
-
-  useFrame((state) => {
-    if (!ref.current || isInteracting.current) return;
-    const t = state.clock.getElapsedTime();
-    if (spin) ref.current.rotation.y = rotation[1] + t * spin;
-    ref.current.position.y = position[1] + Math.sin(t * 0.6) * 0.08;
-  });
-
-  return <primitive ref={ref} object={scene} scale={scale} position={position} rotation={rotation} />;
-}
 
 function HeroCanvas() {
   const isInteracting = useRef(false);
@@ -88,7 +69,6 @@ function HeroCanvas() {
         <directionalLight position={[0, -3, 3]} intensity={0.5} color="#ffffff" />
         <pointLight position={[0, -2, 2]} intensity={0.6} color={accent} />
         <Suspense fallback={null}>
-          <HeroModel isInteracting={isInteracting} />
           <ContactShadows position={[0, -1.4, 0]} opacity={0.45} scale={4} blur={2.5} color={primary} />
         </Suspense>
         <OrbitControls
