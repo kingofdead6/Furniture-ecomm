@@ -4,6 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "start": "node index.js",
+    "setup": "node scripts/setup.js",
+    "seed": "node seed/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
