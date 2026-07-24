@@ -62,7 +62,6 @@ orderSchema.pre('save', async function (next) {
     this.orderNumber = `AT-${String(count + 1).padStart(6, '0')}`;
     this.statusHistory = [{ status: this.status, at: new Date() }];
   }
-  next();
 });
 
 export default mongoose.model('Order', orderSchema);

@@ -26,14 +26,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-import User from '../Models/User.js';
-import Category from '../Models/Categories.js';
-import Collection from '../Models/Collection.js';
-import Product from '../Models/Product.js';
-import Coupon from '../Models/Coupon.js';
-import Review from '../Models/Review.js';
-import DeliveryArea from '../Models/DeliveryArea.js';
-import { slugify } from '../utils/slugify.js';
+import User from './Models/User.js';
+import Category from './Models/Categories.js';
+import Collection from './Models/Collection.js';
+import Product from './Models/Product.js';
+import Coupon from './Models/Coupon.js';
+import Review from './Models/Review.js';
+import DeliveryArea from './Models/DeliveryArea.js';
+import { slugify } from './utils/slugify.js';
 
 dotenv.config();
 

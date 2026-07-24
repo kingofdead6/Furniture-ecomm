@@ -87,7 +87,6 @@ productSchema.pre('save', function (next) {
     this.colors = [...colorMap.entries()].map(([name, hex]) => ({ name, hex }));
     this.stock = this.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
   }
-  next();
 });
 
 export default mongoose.model('Product', productSchema);
