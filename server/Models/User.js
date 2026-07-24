@@ -34,7 +34,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre('save', async function (next) {
+// Async pre-save hook: Mongoose does not pass `next` to async middleware —
+// resolving the promise is the signal to continue, so we must not call next().
+userSchema.pre('save', async function () {
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);
   }
