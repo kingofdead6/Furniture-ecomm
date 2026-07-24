@@ -1,52 +1,60 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // SINGLE SOURCE OF TRUTH
-// Everything brand-specific lives here. Components, Tailwind, index.html and the
-// document head all read from this file. To rebrand a store, edit this file only —
-// never the components.
+// Everything brand-specific lives here. Components, Tailwind tokens, index.html
+// and the document head all read from this file. To rebrand a store, edit this
+// file only — never the components.
 //
-// Changing the entire look of the store = editing the three `theme` hex values.
+// The whole look changes from the `theme` values below. `ink` is the near-black,
+// `bone` the off-white base, `clay` the single accent used sparingly.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const store = {
   brand: {
-    name: "NOVYX",                       // text logo / brand name shown everywhere
-    fullName: "NOVYX Mobile",            // used in copyright / formal contexts
-    tagline: "Algeria's #1 source for original smartphones. Best prices, fast delivery, cash on delivery.",
-    logoText: "NOVYX",                   // text logo fallback (rendered with accent dot)
-    logo: "/src/assets/Logo.png",        // optional image logo (favicon source in this demo)
+    name: "ATELIER",
+    fullName: "Atelier Studio",
+    tagline: "Considered clothing, made to last. Cash on delivery across Algeria.",
+    logoText: "ATELIER",
+    logo: "/src/assets/Logo.png",
     favicon: "/src/assets/Logo.png",
   },
   niche: {
-    type: "general",
-    productNoun: "product",
-    productNounPlural: "products",
+    type: "clothing",
+    productNoun: "piece",
+    productNounPlural: "pieces",
   },
   theme: {
-    primary:   "#6C2BD9",   // brand purple — buttons, gradients, glows, primary accents
-    secondary: "#8B5CF6",   // brand violet — gradient pair / surfaces / hover states
-    accent:    "#22D3EE",   // brand cyan   — highlights, badges, links, the logo dot
+    ink:   "#17130E",   // near-black — text, primary buttons/surfaces
+    bone:  "#F3EFE6",   // off-white page base
+    paper: "#E9E3D6",   // secondary surface / cards
+    clay:  "#B4471F",   // THE accent — links, one CTA, sale marks
+    muted: "#8A8272",   // secondary text
+
+    // Legacy aliases kept so nothing referencing the old names breaks.
+    primary:   "#17130E",
+    secondary: "#B4471F",
+    accent:    "#B4471F",
   },
   contact: {
-    email:    "contact@novyx.dz",
-    phone:    "+213 XXX XXX XXX",
-    phoneHref: "+213XXXXXXXXX",          // digits-only form used in tel: links
-    whatsapp: "213XXXXXXXXX",            // digits-only form used in wa.me links
-    address:  "Algeria",
+    email:    "hello@atelier.dz",
+    phone:    "+213 555 010 203",
+    phoneHref: "+213555010203",
+    whatsapp: "213555010203",
+    address:  "12 Rue Didouche Mourad, Alger, Algeria",
   },
   social: {
-    instagram: "",
-    facebook:  "",
-    tiktok:    "",
+    instagram: "https://instagram.com",
+    facebook:  "https://facebook.com",
+    tiktok:    "https://tiktok.com",
   },
   locale: {
     currency:       "DZD",
     currencySymbol: "DA",
     locale:         "fr-DZ",
-    lang:           "fr",
+    lang:           "en",
   },
   seo: {
-    title:       "NovyxMobile",
-    description: "Algeria's #1 source for original smartphones. Best prices, fast delivery, cash on delivery.",
+    title:       "ATELIER — Considered Clothing",
+    description: "Considered clothing, made to last. Outerwear, knitwear and essentials. Cash on delivery across Algeria.",
     ogImage:     "/src/assets/Logo.png",
   },
 };

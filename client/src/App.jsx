@@ -1,13 +1,30 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { Toaster } from "react-hot-toast";
 
-import HomePage from "./Pages/HomePage";
 import Navbar from "./Components/Shared/NavBar";
 import Footer from "./Components/Shared/Footer";
-
-
-import CartPage from "./Components/Shared/Cart";
-import Login from "./Pages/Login";
+import ScrollToTop from "./Components/Shared/ScrollToTop";
 import ProtectedRoute from "./Components/Shared/ProtectedRoute";
+
+import HomePage from "./Pages/HomePage";
+import Shop from "./Pages/Shop";
+import ProductDetail from "./Pages/ProductDetail";
+import SearchPage from "./Pages/SearchPage";
+import CollectionsPage from "./Pages/CollectionsPage";
+import CollectionDetail from "./Pages/CollectionDetail";
+import CartPage from "./Pages/CartPage";
+import Checkout from "./Pages/Checkout";
+import OrderConfirmation from "./Pages/OrderConfirmation";
+import Wishlist from "./Pages/Wishlist";
+import AboutPage from "./Pages/AboutPage";
+import ContactPage from "./Pages/ContactPage";
+import FAQ from "./Pages/FAQ";
+import ShippingReturns from "./Pages/ShippingReturns";
+import Account from "./Pages/Account";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import NotFound from "./Pages/NotFound";
 
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminProducts from "./Components/Admin/AdminProducts";
@@ -15,62 +32,85 @@ import AdminCategories from "./Components/Admin/AdminCategories";
 import AdminDeliveryAreas from "./Components/Admin/AdminDeliveryAreas";
 import AdminUsers from "./Components/Admin/AdminUsers";
 import AdminOrders from "./Components/Admin/AdminOrders";
-
-import FinalizeOrder from "./Components/Products/FinalizeOrder";
-import NotFound from "./Pages/NotFound";
-import ScrollToTop from "./Components/Shared/ScrollToTop";
-import ProductsPage from "./Pages/ProductsPage";
-import ContactPage from "./Pages/ContactPage";
 import AdminContactMessages from "./Components/Admin/AdminContactMessages.jsx";
-import ProductDetailsPage from "./Components/Products/ProductDetails.jsx";
 
-function App() {
+// Slow, quiet cross-fade + lift between pages.
+function Page({ children }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Page><HomePage /></Page>} />
+        <Route path="/products" element={<Page><Shop /></Page>} />
+        <Route path="/products/:id" element={<Page><ProductDetail /></Page>} />
+        <Route path="/search" element={<Page><SearchPage /></Page>} />
+        <Route path="/collections" element={<Page><CollectionsPage /></Page>} />
+        <Route path="/collections/:slug" element={<Page><CollectionDetail /></Page>} />
+        <Route path="/cart" element={<Page><CartPage /></Page>} />
+        <Route path="/checkout" element={<Page><Checkout /></Page>} />
+        <Route path="/order/:id" element={<Page><OrderConfirmation /></Page>} />
+        <Route path="/wishlist" element={<Page><Wishlist /></Page>} />
+        <Route path="/about" element={<Page><AboutPage /></Page>} />
+        <Route path="/contact" element={<Page><ContactPage /></Page>} />
+        <Route path="/faq" element={<Page><FAQ /></Page>} />
+        <Route path="/shipping-returns" element={<Page><ShippingReturns /></Page>} />
+        <Route path="/account" element={<Page><Account /></Page>} />
+        <Route path="/login" element={<Page><Login /></Page>} />
+        <Route path="/register" element={<Page><Register /></Page>} />
+
+        {/* Admin */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/contacts" element={<AdminContactMessages />} />
+        </Route>
+
+        <Route path="*" element={<Page><NotFound /></Page>} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+export default function App() {
   return (
     <Router>
       <ScrollToTop />
-
-      {/* Aurora background — fixed, behind everything */}
-      <div className="nv-aurora-bg">
-        <div className="nv-aurora-a" />
-        <div className="nv-aurora-b" />
-        <div className="nv-aurora-c" />
-        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% -10%,rgba(255,255,255,.05),transparent 55%)" }} />
-      </div>
-
-      <div style={{ position: "relative", zIndex: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: "#17130E",
+            color: "#F3EFE6",
+            borderRadius: 0,
+            fontSize: 13,
+            letterSpacing: "0.02em",
+          },
+        }}
+      />
+      <div className="flex min-h-screen flex-col">
         <Navbar />
-
-        <div style={{ flex: 1 }}>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/products/:id" element={<ProductDetailsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<FinalizeOrder />} />
-            <Route path="/login" element={<Login />} />
-
-            {/* Protected Admin Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
-              <Route path="/admin/categories" element={<AdminCategories />} />
-              <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-              <Route path="/admin/orders" element={<AdminOrders />} />
-              <Route path="/admin/contacts" element={<AdminContactMessages />} />
-            </Route>
-
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-
+        <main className="flex-1">
+          <AnimatedRoutes />
+        </main>
         <Footer />
       </div>
     </Router>
   );
 }
-
-export default App;
