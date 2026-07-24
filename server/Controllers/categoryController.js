@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import Category from '../Models/Categories.js';
 import { uploadToCloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
+import { slugify } from '../utils/slugify.js';
 
 export const getCategories = asyncHandler(async (req, res) => {
   const categories = await Category.find({}).sort({ name: 1 }).lean();
@@ -32,12 +33,12 @@ export const createCategory = asyncHandler(async (req, res) => {
 
   let image = { url: null, public_id: null };
   if (req.file) {
-    const url = await uploadToCloudinary(req.file);
-    image = { url, public_id: null };
+    image = await uploadToCloudinary(req.file);
   }
 
   const category = await Category.create({
     name: name.trim(),
+    slug: slugify(name),
     description: description ? description.trim() : '',
     image,
   });
@@ -53,12 +54,17 @@ export const updateCategory = asyncHandler(async (req, res) => {
   }
 
   const { name, description } = req.body;
-  if (name) category.name = name.trim();
+  if (name) {
+    category.name = name.trim();
+    category.slug = slugify(name);
+  }
   if (description !== undefined) category.description = description.trim();
 
   if (req.file) {
-    const url = await uploadToCloudinary(req.file);
-    category.image = { url, public_id: null };
+    if (category.image?.public_id) {
+      await deleteFromCloudinary(category.image.public_id).catch(() => {});
+    }
+    category.image = await uploadToCloudinary(req.file);
   }
 
   const updated = await category.save();

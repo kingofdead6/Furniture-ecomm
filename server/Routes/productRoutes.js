@@ -3,7 +3,10 @@ import multer from 'multer';
 import { protect, admin } from '../Middleware/auth.js';
 import {
   getProducts,
+  getFacets,
   getProductById,
+  getProductBySlug,
+  getRelatedProducts,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -21,6 +24,9 @@ const upload = multer({
 
 // Public
 router.get('/', getProducts);
+router.get('/facets', getFacets);
+router.get('/slug/:slug', getProductBySlug);
+router.get('/:id/related', getRelatedProducts);
 router.get('/:id', getProductById);
 
 // Admin

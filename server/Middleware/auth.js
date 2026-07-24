@@ -9,6 +9,9 @@ export const protect = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = await User.findById(decoded.id).select('-password');
+      if (!req.user) {
+        return res.status(401).json({ message: 'Not authorized, user not found' });
+      }
       next();
     } catch (error) {
       res.status(401).json({ message: 'Not authorized, token failed' });
@@ -16,6 +19,22 @@ export const protect = asyncHandler(async (req, res, next) => {
   } else {
     res.status(401).json({ message: 'Not authorized, no token' });
   }
+});
+
+// Attaches req.user when a valid token is present but never rejects the request.
+// Used by checkout so a logged-in customer's order is linked to their account
+// while guests can still order.
+export const optionalAuth = asyncHandler(async (req, res, next) => {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      const token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+    } catch {
+      req.user = null;
+    }
+  }
+  next();
 });
 
 export const admin = (req, res, next) => {

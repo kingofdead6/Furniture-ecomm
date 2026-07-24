@@ -32,7 +32,8 @@ export const uploadToCloudinary = async (file, resourceType = 'image') => {
       );
       stream.end(file.buffer);
     });
-    return uploadResult.secure_url;
+    // Return both so callers can persist public_id and later delete the asset.
+    return { url: uploadResult.secure_url, public_id: uploadResult.public_id };
   } catch (error) {
     console.error(`Cloudinary ${resourceType} upload error:`, error);
     throw new Error(`Failed to upload ${resourceType} to Cloudinary: ${error.message}`);

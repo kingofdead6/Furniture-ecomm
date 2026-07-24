@@ -9,8 +9,8 @@ import {
 
 const router = express.Router();
 
-router.get('/', getDeliveryAreas);                    
-router.post('/',  createDeliveryArea); 
+router.get('/', getDeliveryAreas);
+router.post('/', protect, admin, createDeliveryArea);
 router.put('/:id', protect, admin, updateDeliveryArea);
 router.delete('/:id', protect, admin, deleteDeliveryArea);
 
