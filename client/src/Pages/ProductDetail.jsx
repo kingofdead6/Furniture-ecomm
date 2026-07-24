@@ -365,7 +365,7 @@ function ReviewSection({ productId, reviews, setReviews, defaultName }) {
           </div>
           <button
             onClick={() => setOpen((v) => !v)}
-            className="border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] hover:bg-ink hover:text-bone"
+            className="border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] btn-line"
           >
             Write a review
           </button>

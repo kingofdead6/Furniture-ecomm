@@ -46,20 +46,20 @@ export default function HomePage() {
       {/* ── HERO — asymmetric, type-led ── */}
       <section className="mx-auto grid max-w-[1400px] items-end gap-8 px-5 pb-8 pt-10 md:grid-cols-12 md:px-8 md:pt-16">
         <div className="md:col-span-6 md:pb-10">
-          <p className="eyebrow text-clay">Autumn / Winter 2025</p>
-          <h1 className="display mt-5 text-[clamp(3rem,10vw,7.5rem)]">
+          <p className="eyebrow fade-up text-clay" style={{ animationDelay: "60ms" }}>Autumn / Winter 2025</p>
+          <h1 className="display fade-up mt-5 text-[clamp(3rem,10vw,7.5rem)]" style={{ animationDelay: "140ms" }}>
             Quiet<br />
             clothes for<br />
             <span className="italic">loud</span> lives.
           </h1>
-          <p className="mt-6 max-w-md text-muted">{store.brand.tagline}</p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <p className="fade-up mt-6 max-w-md text-muted" style={{ animationDelay: "300ms" }}>{store.brand.tagline}</p>
+          <div className="fade-up mt-8 flex flex-wrap items-center gap-4" style={{ animationDelay: "420ms" }}>
             <Link
               to="/products"
-              className="group inline-flex items-center gap-3 bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone transition-colors hover:bg-clay"
+              className="group inline-flex items-center gap-3 bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid"
             >
               Shop the collection
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              <ArrowRight size={16} className="btn-arrow" />
             </Link>
             <Link to="/collections" className="link-underline text-xs font-semibold uppercase tracking-[0.16em]">
               View lookbook
@@ -67,7 +67,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="md:col-span-6">
-          <div className="aspect-[4/5] w-full overflow-hidden bg-paper md:aspect-[3/4]">
+          <div className="card-media fade-up aspect-[4/5] w-full overflow-hidden bg-paper md:aspect-[3/4]" style={{ animationDelay: "220ms" }}>
             <img src={HERO} alt="Atelier AW25 campaign" className="h-full w-full object-cover" />
           </div>
         </div>

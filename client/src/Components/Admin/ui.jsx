@@ -21,8 +21,8 @@ export function PageHeader({ eyebrow, title, count, action }) {
 export function Button({ variant = "solid", className = "", ...rest }) {
   const base = "inline-flex items-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] transition-colors disabled:opacity-50";
   const styles = {
-    solid: "bg-ink text-bone hover:bg-clay",
-    outline: "border border-ink hover:bg-ink hover:text-bone",
+    solid: "bg-ink text-bone btn-solid",
+    outline: "border border-ink btn-line",
     ghost: "text-muted hover:text-ink",
     danger: "border border-clay text-clay hover:bg-clay hover:text-bone",
   };

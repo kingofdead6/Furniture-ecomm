@@ -164,3 +164,82 @@ body {
 /* Native controls inherit the palette. */
 input, select, textarea, button { font-family: inherit; color: inherit; }
 select option { color: var(--ink); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Animated buttons — a clay (solid) / ink (outline) fill sweeps up on hover and
+   the button lifts. Text stays readable throughout. These classes add only the
+   motion + fill; the element keeps its own bg/text/padding utilities.
+   ───────────────────────────────────────────────────────────────────────────── */
+.btn-solid,
+.btn-line {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.45s var(--ease), color 0.4s var(--ease), box-shadow 0.45s var(--ease);
+}
+.btn-solid::before,
+.btn-line::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translateY(101%);
+  transition: transform 0.5s var(--ease);
+}
+.btn-solid::before { background: var(--clay); }
+.btn-line::before { background: var(--ink); }
+.btn-solid:hover,
+.btn-line:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -14px rgb(var(--ink-rgb) / 0.5);
+}
+.btn-solid:hover::before,
+.btn-line:hover::before { transform: translateY(0); }
+.btn-line:hover { color: var(--bone); }
+.btn-solid:active,
+.btn-line:active { transform: translateY(0); }
+
+/* Move a trailing arrow/icon on hover (e.g. .group buttons with an icon). */
+.btn-solid:hover .btn-arrow,
+.btn-line:hover .btn-arrow,
+.group:hover .btn-arrow { transform: translateX(4px); }
+.btn-arrow { transition: transform 0.45s var(--ease); }
+
+/* ── Card lift + media zoom ── */
+.card-rise { transition: transform 0.5s var(--ease); }
+.group:hover .card-rise { transform: translateY(-6px); }
+.card-media { overflow: hidden; }
+.card-media img { transition: transform 0.9s var(--ease); }
+.group:hover .card-media img { transform: scale(1.05); }
+
+/* Sliding "quick action" bar revealed on card hover. */
+.card-quick {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.5s var(--ease), opacity 0.5s var(--ease);
+}
+.group:hover .card-quick { transform: translateY(0); opacity: 1; }
+
+/* Wishlist heart pop. */
+.heart-pop { transition: transform 0.35s var(--ease), background 0.3s; }
+.heart-pop:hover { transform: scale(1.12); }
+.heart-pop:active { transform: scale(0.9); }
+
+/* ── Generic hover-rise for cards/links ── */
+.hover-rise { transition: transform 0.4s var(--ease); }
+.hover-rise:hover { transform: translateY(-3px); }
+
+/* ── Entrance: fade-up on mount (staggered via inline animation-delay) ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.7s var(--ease) both; }
+
+/* Smooth colour/opacity transitions on links & icon buttons site-wide. */
+a, button { transition: color 0.3s var(--ease), opacity 0.3s var(--ease); }
+@media (prefers-reduced-motion: reduce) {
+  .btn-solid, .btn-line, .card-rise, .card-media img, .card-quick, .hover-rise, .fade-up,
+  .btn-solid::before, .btn-line::before { transition: none !important; animation: none !important; }
+  .card-quick { opacity: 1; transform: none; }
+}

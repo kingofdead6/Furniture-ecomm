@@ -10,10 +10,10 @@ export default function NotFound() {
         The page you're looking for doesn't exist or has moved. Let's get you back to something good.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
-        <Link to="/" className="bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay">
+        <Link to="/" className="bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid">
           Back home
         </Link>
-        <Link to="/products" className="border border-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] hover:bg-ink hover:text-bone">
+        <Link to="/products" className="border border-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] btn-line">
           Shop the collection
         </Link>
       </div>

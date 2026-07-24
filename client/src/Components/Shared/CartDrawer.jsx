@@ -41,7 +41,7 @@ export default function CartDrawer({ open, onClose }) {
             <Link
               to="/products"
               onClick={onClose}
-              className="mt-8 border border-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] hover:bg-ink hover:text-bone"
+              className="mt-8 border border-ink px-8 py-3 text-xs font-semibold uppercase tracking-[0.18em] btn-line"
             >
               Start shopping
             </Link>
@@ -105,7 +105,7 @@ export default function CartDrawer({ open, onClose }) {
               <Link
                 to="/checkout"
                 onClick={onClose}
-                className="mt-5 block bg-ink py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-bone transition-colors hover:bg-clay"
+                className="mt-5 block bg-ink py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid"
               >
                 Checkout
               </Link>

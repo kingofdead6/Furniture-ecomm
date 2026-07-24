@@ -316,14 +316,14 @@ export default function Checkout() {
               </button>
             ) : <span />}
             {step < STEPS.length - 1 ? (
-              <button onClick={next} className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay">
+              <button onClick={next} className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid">
                 Continue
               </button>
             ) : (
               <button
                 onClick={placeOrder}
                 disabled={placing}
-                className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay disabled:opacity-50"
+                className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid disabled:opacity-50"
               >
                 {placing ? "Placing order…" : `Place order · ${formatPrice(total)}`}
               </button>
@@ -348,7 +348,7 @@ export default function Checkout() {
                 <button
                   onClick={applyCoupon}
                   disabled={coupon.checking}
-                  className="border border-ink px-4 text-xs font-semibold uppercase tracking-[0.12em] hover:bg-ink hover:text-bone disabled:opacity-50"
+                  className="border border-ink px-4 text-xs font-semibold uppercase tracking-[0.12em] btn-line disabled:opacity-50"
                 >
                   {coupon.checking ? "…" : "Apply"}
                 </button>

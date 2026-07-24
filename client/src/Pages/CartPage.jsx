@@ -93,7 +93,7 @@ export default function CartPage() {
             </div>
             <Link
               to="/checkout"
-              className="mt-6 block bg-ink py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-bone transition-colors hover:bg-clay"
+              className="mt-6 block bg-ink py-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid"
             >
               Proceed to checkout
             </Link>

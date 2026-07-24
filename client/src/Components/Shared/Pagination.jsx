@@ -34,7 +34,7 @@ export default function Pagination({ page, totalPages, onChange }) {
             onClick={() => onChange(p)}
             aria-current={p === page ? "page" : undefined}
             className={`${btn} ${
-              p === page ? "border-ink bg-ink text-bone" : "border-line hover:bg-ink hover:text-bone"
+              p === page ? "border-ink bg-ink text-bone" : "border-line btn-line"
             }`}
           >
             {p}
