@@ -1,134 +1,122 @@
 import { useState } from "react";
-import axios from "axios";
-import { API_BASE_URL } from "../../api";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { api, apiError } from "../lib/api";
 import { store } from "../store.config.js";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
-  const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const set = (patch) => setForm((f) => ({ ...f, ...patch }));
+
+  const submit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    if (!form.name || !form.email || !form.subject || !form.message) {
+      return toast.error("Please fill in all required fields");
+    }
+    setSending(true);
     try {
-      await axios.post(`${API_BASE_URL}/contact`, form);
-      toast.success("Message sent! We'll get back to you shortly.");
+      await api.post("/contact", form);
+      setSent(true);
       setForm({ name: "", email: "", phone: "", subject: "", message: "" });
-    } catch {
-      toast.error("Failed to send message. Please try again.");
+      toast.success("Message sent — we'll be in touch");
+    } catch (err) {
+      toast.error(apiError(err));
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
-  const inputStyle = {
-    width: "100%", padding: "14px 18px", borderRadius: 14,
-    background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.1)",
-    color: "#fff", fontFamily: "'Manrope'", fontSize: 15, outline: "none",
-    transition: "border-color .2s", boxSizing: "border-box",
-  };
+  const inputCls = "w-full border border-line bg-transparent px-4 py-3.5 text-sm outline-none transition-colors focus:border-ink";
+  const labelCls = "eyebrow mb-2 block";
 
   return (
-    <main style={{ minHeight: "100vh", position: "relative", zIndex: 2 }}>
-      <section style={{ maxWidth: 760, margin: "0 auto", padding: "80px 26px 100px" }}>
-        {/* Header */}
-        <div style={{ marginBottom: 52 }}>
-          <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 12.5, letterSpacing: ".12em", color: "var(--accent)", margin: "0 0 14px" }}>
-            // CONTACT US
-          </p>
-          <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(34px,5vw,56px)", letterSpacing: "-.03em", margin: "0 0 16px", lineHeight: 1.1 }}>
-            Get in Touch
-          </h1>
-          <p style={{ fontFamily: "'Manrope'", fontSize: 16, color: "#94A3B8", margin: 0, lineHeight: 1.65 }}>
-            Have a question or need help? Send us a message and we'll respond as soon as possible.
-          </p>
-        </div>
+    <div className="mx-auto max-w-[1400px] px-5 py-12 md:px-8">
+      <div className="border-b border-line pb-8">
+        <p className="eyebrow">We're here to help</p>
+        <h1 className="display mt-2 text-[clamp(2.5rem,8vw,6rem)]">Contact</h1>
+      </div>
 
-        {/* Contact Info Row */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 14, marginBottom: 44 }}>
-          {[
-            { icon: "📞", label: "Phone", value: store.contact.phone },
-            { icon: "✉️", label: "Email", value: store.contact.email },
-            { icon: "📍", label: "Location", value: store.contact.address },
-          ].map(({ icon, label, value }) => (
-            <div key={label} style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: "18px 20px", display: "flex", gap: 14, alignItems: "flex-start" }}>
-              <span style={{ fontSize: 20 }}>{icon}</span>
-              <div>
-                <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 4px", letterSpacing: ".06em" }}>{label.toUpperCase()}</p>
-                <p style={{ fontFamily: "'Manrope'", fontSize: 14, fontWeight: 600, color: "#fff", margin: 0 }}>{value}</p>
-              </div>
+      <div className="grid gap-16 pt-12 lg:grid-cols-[1fr_1.2fr]">
+        {/* Details */}
+        <div>
+          <p className="max-w-sm text-muted">
+            Questions about an order, sizing, or a return? Send us a note and we'll reply within one
+            business day.
+          </p>
+          <div className="mt-10 space-y-6">
+            <a href={`mailto:${store.contact.email}`} className="flex items-start gap-4 hover:text-clay">
+              <Mail size={20} className="mt-0.5 shrink-0" />
+              <span>
+                <span className="eyebrow block">Email</span>
+                <span className="mt-1 block">{store.contact.email}</span>
+              </span>
+            </a>
+            <a href={`tel:${store.contact.phoneHref}`} className="flex items-start gap-4 hover:text-clay">
+              <Phone size={20} className="mt-0.5 shrink-0" />
+              <span>
+                <span className="eyebrow block">Phone</span>
+                <span className="mt-1 block">{store.contact.phone}</span>
+              </span>
+            </a>
+            <div className="flex items-start gap-4">
+              <MapPin size={20} className="mt-0.5 shrink-0" />
+              <span>
+                <span className="eyebrow block">Studio</span>
+                <span className="mt-1 block">{store.contact.address}</span>
+              </span>
             </div>
-          ))}
+          </div>
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            background: "rgba(255,255,255,.03)",
-            border: "1px solid rgba(255,255,255,.08)",
-            borderRadius: 28,
-            padding: "40px 36px",
-          }}
-        >
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-            <input
-              type="text" placeholder="Full Name *" required
-              value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-              style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = "rgb(var(--secondary-rgb) / .6)")}
-              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
-            />
-            <input
-              type="email" placeholder="Email Address *" required
-              value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-              style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = "rgb(var(--secondary-rgb) / .6)")}
-              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
-            />
+        {sent ? (
+          <div className="flex flex-col items-start justify-center border border-line p-12">
+            <p className="eyebrow text-clay">Message received</p>
+            <h2 className="display mt-3 text-3xl">Thank you.</h2>
+            <p className="mt-3 text-muted">We've got your message and will reply shortly.</p>
+            <button onClick={() => setSent(false)} className="mt-8 border border-ink px-6 py-3 text-xs font-semibold uppercase tracking-[0.16em] hover:bg-ink hover:text-bone">
+              Send another
+            </button>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-            <input
-              type="tel" placeholder="Phone Number"
-              value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-              style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = "rgb(var(--secondary-rgb) / .6)")}
-              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
-            />
-            <input
-              type="text" placeholder="Subject *" required
-              value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })}
-              style={inputStyle}
-              onFocus={e => (e.target.style.borderColor = "rgb(var(--secondary-rgb) / .6)")}
-              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
-            />
-          </div>
-          <textarea
-            placeholder="Your message *" rows={6} required
-            value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
-            style={{ ...inputStyle, resize: "vertical", marginBottom: 24 }}
-            onFocus={e => (e.target.style.borderColor = "rgb(var(--secondary-rgb) / .6)")}
-            onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
-          />
-          <button
-            type="submit" disabled={loading}
-            style={{
-              width: "100%", padding: "17px 32px", borderRadius: 16, border: "none",
-              background: "linear-gradient(135deg,var(--secondary),var(--primary))", color: "#fff",
-              fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 17,
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-              boxShadow: "0 12px 32px -8px rgb(var(--primary-rgb) / .8)",
-              transition: "transform .2s,box-shadow .2s",
-            }}
-            onMouseEnter={e => { if (!loading) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 18px 40px -8px rgb(var(--primary-rgb) / .9)"; } }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 12px 32px -8px rgb(var(--primary-rgb) / .8)"; }}
-          >
-            {loading ? "Sending..." : "Send Message"}
-          </button>
-        </form>
-      </section>
-    </main>
+        ) : (
+          <form onSubmit={submit} className="space-y-5">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label className={labelCls}>Name *</label>
+                <input className={inputCls} value={form.name} onChange={(e) => set({ name: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Email *</label>
+                <input type="email" className={inputCls} value={form.email} onChange={(e) => set({ email: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label className={labelCls}>Phone</label>
+                <input className={inputCls} value={form.phone} onChange={(e) => set({ phone: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls}>Subject *</label>
+                <input className={inputCls} value={form.subject} onChange={(e) => set({ subject: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>Message *</label>
+              <textarea className={`${inputCls} resize-none`} rows={6} value={form.message} onChange={(e) => set({ message: e.target.value })} />
+            </div>
+            <button
+              type="submit"
+              disabled={sending}
+              className="bg-ink px-10 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone hover:bg-clay disabled:opacity-50"
+            >
+              {sending ? "Sending…" : "Send message"}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }

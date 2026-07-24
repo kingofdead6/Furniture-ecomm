@@ -1,312 +1,205 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { Search, Heart, User, ShoppingBag, Menu, X } from "lucide-react";
 import { store } from "../../store.config.js";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
+import { useAuth } from "../../context/AuthContext";
+import CartDrawer from "./CartDrawer";
+
+const CUSTOMER_LINKS = [
+  { label: "Shop", to: "/products" },
+  { label: "Collections", to: "/collections" },
+  { label: "About", to: "/about" },
+  { label: "Contact", to: "/contact" },
+];
+
+const ADMIN_LINKS = [
+  { label: "Dashboard", to: "/admin/dashboard" },
+  { label: "Orders", to: "/admin/orders" },
+  { label: "Products", to: "/admin/products" },
+];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
-  const [userType, setUserType] = useState(null);
-  const [scrolled, setScrolled] = useState(false);
-  const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [q, setQ] = useState("");
   const location = useLocation();
+  const navigate = useNavigate();
 
-  useEffect(() => { setMenuOpen(false); setCartOpen(false); }, [location.pathname]);
-
-  const checkAuth = () => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) {
-      try { setUserType(jwtDecode(token).usertype); }
-      catch { setUserType(null); }
-    } else { setUserType(null); }
-  };
-
-  const loadCart = () => {
-    const raw = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCartItems(raw);
-  };
+  const { count } = useCart();
+  const { count: wishCount } = useWishlist();
+  const { isAdmin, isCustomer, isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
-    checkAuth(); loadCart();
-    const h = () => { checkAuth(); loadCart(); };
-    window.addEventListener("storage", h);
-    window.addEventListener("authChanged", h);
-    window.addEventListener("cartUpdated", loadCart);
-    return () => {
-      window.removeEventListener("storage", h);
-      window.removeEventListener("authChanged", h);
-      window.removeEventListener("cartUpdated", loadCart);
-    };
-  }, []);
+    setMenuOpen(false);
+    setCartOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => (document.body.style.overflow = "");
+  }, [menuOpen]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("token");
-    setUserType(null);
-    window.dispatchEvent(new Event("authChanged"));
-    navigate("/login");
+  const links = isAdmin ? ADMIN_LINKS : CUSTOMER_LINKS;
+
+  const submitSearch = (e) => {
+    e.preventDefault();
+    if (!q.trim()) return;
+    navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+    setSearchOpen(false);
+    setQ("");
   };
 
-  const cartCount = cartItems.reduce((s, i) => s + (i.quantity || 1), 0);
-  const cartTotal = cartItems.reduce((s, i) => s + (i.price || 0) * (i.quantity || 1), 0);
-  const isAdmin = userType === "admin" || userType === "superadmin";
-
-  const updateQty = (idx, delta) => {
-    const updated = cartItems.map((item, i) => {
-      if (i !== idx) return item;
-      return { ...item, quantity: Math.max(1, (item.quantity || 1) + delta) };
-    });
-    localStorage.setItem("cart", JSON.stringify(updated));
-    setCartItems(updated);
-    window.dispatchEvent(new Event("cartUpdated"));
-  };
-
-  const removeItem = (idx) => {
-    const updated = cartItems.filter((_, i) => i !== idx);
-    localStorage.setItem("cart", JSON.stringify(updated));
-    setCartItems(updated);
-    window.dispatchEvent(new Event("cartUpdated"));
-  };
-
-  const navItems = isAdmin
-    ? [
-        { label: "Dashboard", to: "/admin/dashboard" },
-        { label: "Commandes", to: "/admin/orders" },
-        { label: "Produits", to: "/admin/products" },
-      ]
-    : [
-        { label: "Home", to: "/" },
-        { label: "Products", to: "/products" },
-        { label: "Contact", to: "/contact" },
-      ];
+  const isActive = (to) => (to === "/" ? location.pathname === "/" : location.pathname.startsWith(to));
 
   return (
     <>
-      {/* ── HEADER ── */}
-      <header
-        className={`sticky top-0 z-[90] backdrop-blur-[22px] saturate-150 border-b border-white/[0.08] transition-all duration-300 ${
-          scrolled
-            ? "bg-[linear-gradient(180deg,rgba(5,8,22,.95),rgba(5,8,22,.8))]"
-            : "bg-[linear-gradient(180deg,rgba(5,8,22,.82),rgba(5,8,22,.45))]"
-        }`}
-      >
-        <div className="max-w-[1280px] mx-auto px-5 sm:px-[26px] py-3.5 flex items-center justify-between gap-6">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-[11px] no-underline shrink-0">
-            <span className="relative w-[34px] h-[34px] rounded-[11px] bg-gradient-to-br from-secondary to-primary flex items-center justify-center shadow-[0_8px_24px_-6px_rgb(var(--primary-rgb)_/_.8)]">
-              <span className="w-[13px] h-[13px] rounded-[4px] bg-white rotate-45 shadow-[0_0_12px_rgba(255,255,255,.7)] block" />
-            </span>
-            <span className="font-['Space_Grotesk'] font-bold text-xl tracking-[-0.02em] text-white">
-              {store.brand.name}<span className="text-accent">.</span>
-            </span>
-          </Link>
+      {/* Announcement band */}
+      <div className="bg-ink text-bone">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-center px-5 py-2 text-center text-[11px] font-medium uppercase tracking-[0.18em]">
+          Cash on delivery across Algeria · Complimentary returns within 14 days
+        </div>
+      </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1.5">
-            {navItems.map((n) => {
-              const active = n.to === "/" ? location.pathname === "/" : location.pathname.startsWith(n.to);
-              return (
+      <header className="sticky top-0 z-[90] border-b border-line bg-bone/95 backdrop-blur-md">
+        <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-5 py-4 md:px-8">
+          {/* Left — desktop nav / mobile burger */}
+          <div className="flex items-center">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="md:hidden -ml-1 p-1"
+              aria-label="Open menu"
+            >
+              <Menu size={22} strokeWidth={1.6} />
+            </button>
+            <nav className="hidden items-center gap-7 md:flex">
+              {links.map((l) => (
                 <Link
-                  key={n.to}
-                  to={n.to}
-                  className={`font-['Manrope'] font-semibold text-[14.5px] px-4 py-[9px] rounded-[11px] border transition-all duration-[250ms] no-underline ${
-                    active
-                      ? "text-white bg-[rgb(var(--secondary-rgb)_/_.2)] border-[rgb(var(--secondary-rgb)_/_.5)]"
-                      : "text-white/65 bg-transparent border-transparent hover:text-white hover:bg-white/[0.07] hover:border-white/20"
+                  key={l.to}
+                  to={l.to}
+                  className={`text-xs font-semibold uppercase tracking-[0.16em] transition-colors ${
+                    isActive(l.to) ? "text-ink" : "text-muted hover:text-ink"
                   }`}
                 >
-                  {n.label}
+                  {l.label}
                 </Link>
-              );
-            })}
-          </nav>
+              ))}
+            </nav>
+          </div>
 
-          {/* Right */}
-          <div className="flex items-center gap-2.5">
+          {/* Center — wordmark */}
+          <Link
+            to={isAdmin ? "/admin/dashboard" : "/"}
+            className="justify-self-center font-display text-2xl tracking-[0.12em] md:text-[28px]"
+          >
+            {store.brand.name}
+          </Link>
+
+          {/* Right — utilities */}
+          <div className="flex items-center justify-end gap-4 md:gap-5">
             {!isAdmin && (
+              <button onClick={() => setSearchOpen((v) => !v)} aria-label="Search" className="p-1 hover:text-clay">
+                <Search size={19} strokeWidth={1.6} />
+              </button>
+            )}
+            {!isAdmin && (
+              <Link to="/wishlist" aria-label="Wishlist" className="relative hidden p-1 hover:text-clay sm:block">
+                <Heart size={19} strokeWidth={1.6} />
+                {wishCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center bg-clay px-1 text-[9px] font-bold text-bone">
+                    {wishCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            <Link
+              to={isAuthenticated ? (isAdmin ? "/admin/dashboard" : "/account") : "/login"}
+              aria-label="Account"
+              className="p-1 hover:text-clay"
+            >
+              <User size={19} strokeWidth={1.6} />
+            </Link>
+            {isAdmin ? (
               <button
-                onClick={() => setCartOpen(true)}
-                className="relative flex items-center gap-[9px] font-['Manrope'] font-semibold text-sm text-white bg-white/[0.05] border border-white/[0.08] px-[15px] py-[9px] rounded-[12px] cursor-pointer transition-all duration-[250ms] hover:bg-[rgb(var(--secondary-rgb)_/_.18)] hover:border-[rgb(var(--secondary-rgb)_/_.5)]"
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
+                className="text-xs font-semibold uppercase tracking-[0.14em] text-muted hover:text-ink"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <path d="M16 10a4 4 0 01-8 0"/>
-                </svg>
-                <span className="hidden sm:inline">Cart</span>
-                {cartCount > 0 && (
-                  <span className="min-w-[20px] h-5 px-[5px] rounded-[10px] bg-gradient-to-br from-accent to-[#0891b2] text-[#031018] text-[11.5px] font-extrabold flex items-center justify-center shadow-[0_0_12px_rgb(var(--accent-rgb)_/_.6)]">
-                    {cartCount}
+                Sign out
+              </button>
+            ) : (
+              <button onClick={() => setCartOpen(true)} aria-label="Cart" className="relative p-1 hover:text-clay">
+                <ShoppingBag size={19} strokeWidth={1.6} />
+                {count > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center bg-ink px-1 text-[9px] font-bold text-bone">
+                    {count}
                   </span>
                 )}
               </button>
             )}
-
-            {isAdmin && (
-              <button
-                onClick={handleLogout}
-                className="font-['Manrope'] font-semibold text-sm text-white/70 bg-transparent border border-white/[0.12] px-4 py-[9px] rounded-[11px] cursor-pointer hover:text-white hover:border-white/30 transition-all duration-[250ms]"
-              >
-                Déconnexion
-              </button>
-            )}
-
-            {/* Burger */}
-            <button
-              onClick={() => setMenuOpen(v => !v)}
-              className="md:hidden flex flex-col gap-1 items-center justify-center w-[42px] h-[42px] rounded-[12px] bg-white/[0.05] border border-white/[0.08] cursor-pointer text-white"
-            >
-              {[0, 1, 2].map(i => (
-                <span key={i} className="w-[18px] h-0.5 bg-current rounded-sm block" />
-              ))}
-            </button>
           </div>
         </div>
+
+        {/* Expanding search */}
+        {searchOpen && (
+          <div className="border-t border-line bg-bone">
+            <form onSubmit={submitSearch} className="mx-auto flex max-w-[1400px] items-center gap-3 px-5 py-4 md:px-8">
+              <Search size={20} strokeWidth={1.6} className="text-muted" />
+              <input
+                autoFocus
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search for pieces, categories…"
+                className="flex-1 bg-transparent font-display text-xl outline-none placeholder:text-muted/60"
+              />
+              <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search" className="text-muted hover:text-ink">
+                <X size={20} />
+              </button>
+            </form>
+          </div>
+        )}
       </header>
 
-      {/* ── MOBILE MENU ── */}
+      {/* Mobile drawer */}
       {menuOpen && (
-        <div
-          onClick={() => setMenuOpen(false)}
-          className="fixed inset-0 z-[100] bg-[rgba(5,8,22,.7)] backdrop-blur-[10px] [animation:fadeIn_.25s]"
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            className="absolute top-0 right-0 bottom-0 w-[min(320px,80vw)] bg-[rgba(15,23,42,.96)] border-l border-white/[0.08] pt-20 px-6 pb-6 flex flex-col gap-2 [animation:drawerIn_.3s_cubic-bezier(.2,.9,.3,1)]"
-          >
-            {/* Close button */}
-            <button
-              onClick={() => setMenuOpen(false)}
-              className="absolute top-5 right-5 w-9 h-9 rounded-[10px] bg-white/[0.06] border border-white/[0.08] text-white cursor-pointer text-base flex items-center justify-center"
-            >
-              ✕
-            </button>
-
-            {navItems.map(n => {
-              const active = n.to === "/" ? location.pathname === "/" : location.pathname.startsWith(n.to);
-              return (
+        <div className="fixed inset-0 z-[120] md:hidden" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-ink/40 [animation:fadeIn_.25s]" onClick={() => setMenuOpen(false)} />
+          <div className="absolute inset-y-0 left-0 flex w-[82%] max-w-sm flex-col bg-bone [animation:drawerIn_.35s_var(--ease)]">
+            <div className="flex items-center justify-between border-b border-line px-6 py-5">
+              <span className="font-display text-xl tracking-[0.1em]">{store.brand.name}</span>
+              <button onClick={() => setMenuOpen(false)} aria-label="Close menu"><X size={22} /></button>
+            </div>
+            <nav className="flex flex-col px-6 py-4">
+              {links.map((l) => (
                 <Link
-                  key={n.to}
-                  to={n.to}
-                  onClick={() => setMenuOpen(false)}
-                  className={`font-['Space_Grotesk'] font-semibold text-[22px] no-underline border-b border-white/[0.08] py-4 px-1 transition-colors duration-200 ${
-                    active ? "text-accent" : "text-white"
-                  }`}
+                  key={l.to}
+                  to={l.to}
+                  className="border-b border-line py-4 font-display text-2xl"
                 >
-                  {n.label}
+                  {l.label}
                 </Link>
-              );
-            })}
-
-            {/* Auth actions in mobile menu */}
-            {!isAdmin && (
-              <button
-                onClick={() => { setMenuOpen(false); setCartOpen(true); }}
-                className="mt-4 flex items-center gap-3 font-['Space_Grotesk'] font-semibold text-lg text-white/70 bg-transparent border-none cursor-pointer py-3 px-1 border-b border-white/[0.08]"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <path d="M16 10a4 4 0 01-8 0"/>
-                </svg>
-                Cart {cartCount > 0 && <span className="text-accent">({cartCount})</span>}
-              </button>
-            )}
-            {isAdmin && (
-              <button
-                onClick={handleLogout}
-                className="mt-4 font-['Space_Grotesk'] font-semibold text-lg text-white/70 bg-transparent border-none cursor-pointer text-left py-3 px-1"
-              >
-                Déconnexion
-              </button>
-            )}
+              ))}
+            </nav>
+            <div className="mt-auto flex flex-col gap-3 border-t border-line px-6 py-6 text-sm">
+              {!isAdmin && (
+                <>
+                  <Link to="/wishlist" className="flex items-center gap-3"><Heart size={18} /> Wishlist</Link>
+                  <Link to={isCustomer ? "/account" : "/login"} className="flex items-center gap-3">
+                    <User size={18} /> {isCustomer ? "My account" : "Sign in"}
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* ── CART DRAWER ── */}
-      {cartOpen && (
-        <div
-          onClick={() => setCartOpen(false)}
-          className="fixed inset-0 z-[110] bg-[rgba(5,8,22,.66)] backdrop-blur-[10px] [animation:fadeIn_.25s]"
-        >
-          <aside
-            onClick={e => e.stopPropagation()}
-            className="absolute top-0 right-0 bottom-0 w-[min(420px,92vw)] bg-[linear-gradient(180deg,rgba(15,23,42,.99),rgba(5,8,22,.99))] border-l border-white/[0.08] flex flex-col [animation:drawerIn_.35s_cubic-bezier(.2,.9,.3,1)] shadow-[-30px_0_80px_-20px_rgba(0,0,0,.7)]"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-[22px] pt-[22px] pb-4 border-b border-white/[0.08]">
-              <span className="font-['Space_Grotesk'] font-bold text-xl">
-                Your Cart <span className="text-slate-400 text-sm font-medium">· {cartCount}</span>
-              </span>
-              <button
-                onClick={() => setCartOpen(false)}
-                className="w-[34px] h-[34px] rounded-[10px] bg-white/[0.06] border border-white/[0.08] text-white cursor-pointer text-base flex items-center justify-center"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto px-[22px] py-4 flex flex-col gap-3.5">
-              {cartItems.length === 0 ? (
-                <div className="text-center py-[60px] px-2.5 text-slate-400">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-[18px] bg-[rgb(var(--secondary-rgb)_/_.12)] flex items-center justify-center text-[26px]">🛒</div>
-                  <p className="font-['Space_Grotesk'] text-white text-[17px] mt-0 mb-1.5">Your cart is empty</p>
-                  <p className="m-0 text-sm">Add a device to get started.</p>
-                </div>
-              ) : (
-                cartItems.map((item, idx) => (
-                  <div key={idx} className="flex gap-3 items-center bg-white/[0.03] border border-white/[0.08] rounded-2xl p-[11px]">
-                    <div className="w-[54px] h-[74px] rounded-[11px] shrink-0 overflow-hidden bg-[rgb(var(--secondary-rgb)_/_.2)]">
-                      {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="m-0 font-bold text-[14.5px] truncate">{item.name}</p>
-                      <p className="mt-[7px] mb-0 font-['Space_Grotesk'] font-bold text-accent text-sm">{(item.price || 0).toLocaleString()} DA</p>
-                    </div>
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="flex items-center gap-2 bg-white/[0.05] rounded-[9px] p-[3px]">
-                        <button onClick={() => updateQty(idx, -1)} className="w-6 h-6 rounded-[7px] border-none bg-white/[0.08] text-white cursor-pointer text-[15px] flex items-center justify-center">−</button>
-                        <span className="font-['JetBrains_Mono'] text-[13px] min-w-[14px] text-center">{item.quantity || 1}</span>
-                        <button onClick={() => updateQty(idx, 1)} className="w-6 h-6 rounded-[7px] border-none bg-white/[0.08] text-white cursor-pointer text-[15px] flex items-center justify-center">+</button>
-                      </div>
-                      <button onClick={() => removeItem(idx)} className="text-[11px] text-slate-400 bg-transparent border-none cursor-pointer hover:text-white transition-colors">Remove</button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Checkout */}
-            {cartItems.length > 0 && (
-              <div className="px-[22px] pt-[18px] pb-[22px] border-t border-white/[0.08] bg-white/[0.02]">
-                <div className="flex justify-between items-baseline mb-3.5">
-                  <span className="text-slate-400 text-sm">Total</span>
-                  <span className="font-['Space_Grotesk'] font-bold text-2xl">{cartTotal.toLocaleString()} DA</span>
-                </div>
-                <Link
-                  to="/checkout"
-                  onClick={() => setCartOpen(false)}
-                  className="block w-full py-[15px] border-none rounded-[14px] bg-gradient-to-br from-secondary to-primary text-white font-['Space_Grotesk'] font-bold text-base cursor-pointer no-underline text-center shadow-[0_16px_40px_-12px_rgb(var(--primary-rgb)_/_.9)]"
-                >
-                  Checkout · Cash on Delivery
-                </Link>
-                <p className="text-center mt-3 mb-0 text-[12.5px] text-slate-400">
-                  🔒 Secure checkout · Free delivery across Algeria
-                </p>
-              </div>
-            )}
-          </aside>
-        </div>
-      )}
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 }

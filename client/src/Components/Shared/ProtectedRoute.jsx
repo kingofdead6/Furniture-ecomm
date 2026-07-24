@@ -11,7 +11,7 @@ export default function ProtectedRoute() {
       return <Outlet />;
     }
     return <Navigate to="/login" />;
-  } catch (error) {
+  } catch {
     return <Navigate to="/login" />;
   }
 }

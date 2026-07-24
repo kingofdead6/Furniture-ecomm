@@ -1,33 +1,37 @@
 // Runtime bridge between store.config.js and the DOM.
-// - Writes the three brand theme colors into CSS variables (--primary/secondary/
-//   accent) so both Tailwind tokens and inline var(--…) styles follow the config.
+// - Writes the brand palette into CSS variables so both Tailwind tokens and any
+//   inline var(--…) styles follow the config.
 // - Syncs the document <title>, <html lang> and favicon from the config.
-// This keeps store.config.js the single source of truth without introducing a
-// separate head-manager library.
+// This keeps store.config.js the single source of truth without a head-manager.
 
 import { store } from "./store.config.js";
 
-// "#6C2BD9" -> "108 43 217" (space-separated channels for rgb(... / alpha))
+// "#B4471F" -> "180 71 31" (space-separated channels for rgb(... / alpha))
 function hexToRgbChannels(hex) {
   let h = String(hex).trim().replace("#", "");
   if (h.length === 3) h = h.split("").map((c) => c + c).join("");
   const n = parseInt(h, 16);
-  const r = (n >> 16) & 255;
-  const g = (n >> 8) & 255;
-  const b = n & 255;
-  return `${r} ${g} ${b}`;
+  return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
 }
 
 export function applyStoreConfig() {
   const root = document.documentElement;
+  const t = store.theme;
 
-  // Theme → CSS variables (hex + rgb-channel forms)
-  root.style.setProperty("--primary", store.theme.primary);
-  root.style.setProperty("--secondary", store.theme.secondary);
-  root.style.setProperty("--accent", store.theme.accent);
-  root.style.setProperty("--primary-rgb", hexToRgbChannels(store.theme.primary));
-  root.style.setProperty("--secondary-rgb", hexToRgbChannels(store.theme.secondary));
-  root.style.setProperty("--accent-rgb", hexToRgbChannels(store.theme.accent));
+  const setVar = (name, value) => value && root.style.setProperty(name, value);
+
+  setVar("--ink", t.ink);
+  setVar("--bone", t.bone);
+  setVar("--paper", t.paper);
+  setVar("--clay", t.clay);
+  setVar("--muted", t.muted);
+
+  // Legacy aliases + rgb channels for alpha usage.
+  setVar("--primary", t.ink);
+  setVar("--secondary", t.clay);
+  setVar("--accent", t.clay);
+  if (t.clay) root.style.setProperty("--clay-rgb", hexToRgbChannels(t.clay));
+  if (t.ink) root.style.setProperty("--ink-rgb", hexToRgbChannels(t.ink));
 
   // SEO / head
   if (store.seo?.title) document.title = store.seo.title;

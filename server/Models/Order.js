@@ -1,33 +1,68 @@
 import mongoose from 'mongoose';
 
-const orderSchema = new mongoose.Schema({
-  customerName: { type: String, required: true, trim: true },
-  customerEmail: { type: String, trim: true },
-  phone: { type: String, required: true, trim: true },
-  
-  wilaya: { type: String, required: true },
-  address: { type: String },
-  desk: { type: String },
-  deliveryType: { type: String, enum: ['home', 'desk'], required: true },
-  
-  deliveryPrice: { type: Number, default: 0 },
-  
-  items: [{
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    name: String,
-    price: Number,
-    image: String,
-    quantity: Number,
-  }],
+const orderSchema = new mongoose.Schema(
+  {
+    // Human-friendly reference shown to the customer (e.g. AT-000123).
+    orderNumber: { type: String, unique: true, index: true },
 
-  subtotal: { type: Number, required: true },
-  totalPrice: { type: Number, required: true },
+    // Set when a logged-in customer places the order; null for guest checkout.
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
-  status: {
-    type: String,
-    enum: ['pending', 'confirmed', 'in_delivery', 'reached', 'canceled'],
-    default: 'pending'
+    customerName: { type: String, required: true, trim: true },
+    customerEmail: { type: String, trim: true },
+    phone: { type: String, required: true, trim: true },
+
+    wilaya: { type: String, required: true },
+    address: { type: String },
+    desk: { type: String },
+    deliveryType: { type: String, enum: ['home', 'desk'], required: true },
+
+    deliveryPrice: { type: Number, default: 0 },
+
+    items: [
+      {
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        variantId: { type: mongoose.Schema.Types.ObjectId },
+        name: String,
+        slug: String,
+        size: String,
+        color: String,
+        sku: String,
+        price: Number, // unit price, re-derived server-side at checkout
+        image: String,
+        quantity: Number,
+      },
+    ],
+
+    subtotal: { type: Number, required: true },
+    couponCode: { type: String, default: null },
+    discount: { type: Number, default: 0 },
+    totalPrice: { type: Number, required: true },
+
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed', 'in_delivery', 'reached', 'canceled'],
+      default: 'pending',
+    },
+    // Append-only audit trail of every status transition.
+    statusHistory: [
+      {
+        status: String,
+        at: { type: Date, default: Date.now },
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+// Assign a sequential, zero-padded order number before the first save.
+orderSchema.pre('save', async function (next) {
+  if (this.isNew && !this.orderNumber) {
+    const count = await this.constructor.countDocuments();
+    this.orderNumber = `AT-${String(count + 1).padStart(6, '0')}`;
+    this.statusHistory = [{ status: this.status, at: new Date() }];
   }
-}, { timestamps: true });
+  next();
+});
 
 export default mongoose.model('Order', orderSchema);

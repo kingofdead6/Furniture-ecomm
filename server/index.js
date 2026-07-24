@@ -11,6 +11,9 @@ import categoryRoutes from './Routes/categoryRoutes.js';
 import deliveryAreaRoutes from './Routes/deliveryAreaRoutes.js';
 import orderRoutes from './Routes/orderRoutes.js';
 import contactRoutes from './Routes/contactRoutes.js';
+import collectionRoutes from './Routes/collectionRoutes.js';
+import couponRoutes from './Routes/couponRoutes.js';
+import reviewRoutes from './Routes/reviewRoutes.js';
 
 dotenv.config();
 
@@ -25,12 +28,17 @@ mongoose
   .then(() => console.log('MongoDB connected'))
   .catch((err) => console.log(err));
 
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/delivery-areas', deliveryAreaRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/collections', collectionRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 app.use(errorHandler);
 
