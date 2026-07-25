@@ -5,8 +5,7 @@ import { api, apiError } from "../../lib/api";
 import { formatPrice } from "../../lib/format";
 import { PageHeader, Table, Row, Cell, StatusBadge, Modal, Button, TableSkeleton, AdminError, AdminEmpty, Field, inputCls } from "./ui";
 
-const GENDERS = ["women", "men", "unisex"];
-const emptyVariant = () => ({ size: "", color: "", colorHex: "#1B1712", sku: "", stock: 0 });
+const emptyVariant = () => ({ size: "", color: "", colorHex: "#5A3E2B", sku: "", stock: 0 });
 // Fixed-width variant inputs (deliberately NOT using inputCls, whose w-full
 // would override the per-field widths and stack the row).
 const vInput = "border border-line bg-transparent px-3 py-2.5 text-sm outline-none focus:border-ink";
@@ -117,7 +116,6 @@ function ProductForm({ product, categories, collections, onClose, onSaved }) {
     category: product?.category?._id || product?.category || "",
     price: product?.price ?? "",
     compareAtPrice: product?.compareAtPrice ?? "",
-    gender: product?.gender || "unisex",
     stock: product?.stock ?? 0,
     description: product?.description || "",
     details: product?.details || "",
@@ -184,11 +182,6 @@ function ProductForm({ product, categories, collections, onClose, onSaved }) {
           </Field>
           <Field label="Price (DA)"><input type="number" className={inputCls} value={form.price} onChange={(e) => set({ price: e.target.value })} /></Field>
           <Field label="Compare-at price (optional)"><input type="number" className={inputCls} value={form.compareAtPrice} onChange={(e) => set({ compareAtPrice: e.target.value })} /></Field>
-          <Field label="Gender">
-            <select className={inputCls} value={form.gender} onChange={(e) => set({ gender: e.target.value })}>
-              {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
-            </select>
-          </Field>
           <Field label="Base stock (used only if no variants)"><input type="number" className={inputCls} value={form.stock} onChange={(e) => set({ stock: e.target.value })} /></Field>
         </div>
 
@@ -201,7 +194,7 @@ function ProductForm({ product, categories, collections, onClose, onSaved }) {
         {/* Variants */}
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <span className="eyebrow">Variants (size / colour / stock)</span>
+            <span className="eyebrow">Variants (size / finish / stock)</span>
             <button type="button" onClick={() => setVariants((v) => [...v, emptyVariant()])} className="text-xs font-semibold uppercase tracking-[0.12em] hover:text-clay">+ Add variant</button>
           </div>
           {variants.length === 0 && <p className="text-xs text-muted">No variants — the base stock above is used.</p>}
@@ -209,7 +202,7 @@ function ProductForm({ product, categories, collections, onClose, onSaved }) {
             {variants.map((v, i) => (
               <div key={i} className="flex flex-wrap items-center gap-2">
                 <input placeholder="Size" className={`${vInput} w-16`} value={v.size} onChange={(e) => setVariant(i, { size: e.target.value })} />
-                <input placeholder="Colour" className={`${vInput} w-28`} value={v.color} onChange={(e) => setVariant(i, { color: e.target.value })} />
+                <input placeholder="Finish" className={`${vInput} w-28`} value={v.color} onChange={(e) => setVariant(i, { color: e.target.value })} />
                 <input type="color" className="h-10 w-10 shrink-0 border border-line" value={v.colorHex} onChange={(e) => setVariant(i, { colorHex: e.target.value })} />
                 <input placeholder="SKU" className={`${vInput} w-28`} value={v.sku} onChange={(e) => setVariant(i, { sku: e.target.value })} />
                 <input type="number" placeholder="Stock" className={`${vInput} w-20`} value={v.stock} onChange={(e) => setVariant(i, { stock: e.target.value })} />

@@ -43,8 +43,8 @@ export default function ContactPage() {
         {/* Details */}
         <div>
           <p className="max-w-sm text-muted">
-            Questions about an order, sizing, or a return? Send us a note and we'll reply within one
-            business day.
+            Questions about an order, dimensions, delivery or a return? Send us a note and we'll
+            reply within one business day.
           </p>
           <div className="mt-10 space-y-6">
             <a href={`mailto:${store.contact.email}`} className="flex items-start gap-4 hover:text-clay">

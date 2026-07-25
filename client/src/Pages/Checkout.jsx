@@ -149,7 +149,7 @@ export default function Checkout() {
   return (
     <div className="mx-auto max-w-[1100px] px-5 py-12 md:px-8">
       <Link to="/cart" className="flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] text-muted hover:text-ink">
-        <ChevronLeft size={15} /> Back to bag
+        <ChevronLeft size={15} /> Back to cart
       </Link>
       <h1 className="display mt-4 text-[clamp(2.2rem,6vw,4rem)]">Checkout</h1>
 

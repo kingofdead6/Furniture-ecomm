@@ -103,7 +103,7 @@ export default function ProductDetail() {
       },
       qty
     );
-    toast.success("Added to your bag");
+    toast.success("Added to your cart");
   };
 
   if (loading) {
@@ -185,7 +185,7 @@ export default function ProductDetail() {
           {hasVariants && product.colors?.length > 0 && (
             <div className="mt-8">
               <div className="flex items-baseline justify-between">
-                <h3 className="eyebrow">Colour{color && <span className="ml-2 normal-case tracking-normal text-ink">— {color}</span>}</h3>
+                <h3 className="eyebrow">Finish{color && <span className="ml-2 normal-case tracking-normal text-ink">— {color}</span>}</h3>
               </div>
               <div className="mt-3 flex flex-wrap gap-2.5">
                 {product.colors.map((c) => (
@@ -210,7 +210,7 @@ export default function ProductDetail() {
               <div className="flex items-baseline justify-between">
                 <h3 className="eyebrow">Size</h3>
                 <button onClick={() => setGuideOpen(true)} className="flex items-center gap-1.5 text-xs text-muted hover:text-ink">
-                  <Ruler size={14} /> Size guide
+                  <Ruler size={14} /> Dimensions
                 </button>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -232,7 +232,7 @@ export default function ProductDetail() {
                 ))}
               </div>
               {selectedVariant && maxStock > 0 && maxStock <= 5 && (
-                <p className="mt-3 text-xs text-clay">Only {maxStock} left in this size.</p>
+                <p className="mt-3 text-xs text-clay">Only {maxStock} left in this option.</p>
               )}
             </div>
           )}
@@ -257,7 +257,7 @@ export default function ProductDetail() {
               disabled={!canAdd}
               className="flex-1 bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone transition-colors enabled:hover:bg-clay disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {canAdd || !hasVariants ? "Add to bag" : "Select options"}
+              {canAdd || !hasVariants ? "Add to cart" : "Select options"}
             </button>
             <button
               onClick={() => toggle(product._id)}
@@ -276,7 +276,7 @@ export default function ProductDetail() {
             {[
               { key: "details", label: "Details", body: product.details || product.description },
               { key: "material", label: "Material & Care", body: [product.material, product.care].filter(Boolean).join("\n") },
-              { key: "delivery", label: "Delivery & Returns", body: "Cash on delivery across Algeria. Delivery is calculated at checkout by wilaya. Complimentary returns within 14 days." },
+              { key: "delivery", label: "Delivery & Assembly", body: "Cash on delivery across Algeria — cost is calculated at checkout by wilaya. Smaller items ship in 2–5 days; larger pieces are made to order (2–4 weeks). Most items arrive flat-packed; in-home assembly is available on request in major cities. Returns within 14 days on unused, repackaged items." },
             ].map((row) => (
               <div key={row.key} className="border-b border-line">
                 <button

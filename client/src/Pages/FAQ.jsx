@@ -12,17 +12,18 @@ const GROUPS = [
     ],
   },
   {
-    title: "Shipping & Delivery",
+    title: "Delivery & Assembly",
     items: [
       { q: "Where do you deliver?", a: "Across Algeria. Delivery cost depends on your wilaya and whether you choose home delivery or a pickup point — it's shown at checkout." },
-      { q: "How long does delivery take?", a: "Typically 2–5 business days depending on your wilaya. We'll call to confirm before dispatch." },
+      { q: "How long does delivery take?", a: "Small items ship in 2–5 business days. Larger pieces such as sofas and beds are made to order and typically arrive within 2–4 weeks. We'll call to confirm before dispatch." },
+      { q: "Do you assemble the furniture?", a: "Most pieces arrive flat-packed with clear instructions and the tools you need. For large items in Alger, Oran and Constantine we can arrange assembly on request — just ask when we call to confirm." },
     ],
   },
   {
-    title: "Returns & Sizing",
+    title: "Returns & Dimensions",
     items: [
-      { q: "What is your return policy?", a: "Unworn pieces with tags can be returned within 14 days. See Shipping & Returns for the full details." },
-      { q: "How do I choose my size?", a: "Each product page has a size guide with measurements in centimetres. If you're between sizes, we suggest sizing up." },
+      { q: "What is your return policy?", a: "Unused pieces in their original packaging can be returned within 14 days. Made-to-order upholstery is final sale — see Shipping & Returns for the full details." },
+      { q: "How do I know it will fit?", a: "Every product page lists full dimensions in centimetres, and the Dimensions guide has tips for measuring your space, doorways and stairwells before you order." },
     ],
   },
 ];

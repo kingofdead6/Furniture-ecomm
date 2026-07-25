@@ -46,7 +46,7 @@ export default function Footer() {
         <div className="mx-auto grid max-w-[1400px] gap-8 px-5 py-16 md:grid-cols-2 md:items-center md:px-8">
           <div>
             <h2 className="display text-[clamp(2rem,5vw,3.5rem)] leading-[0.95]">
-              Join the studio<br />list.
+              Join the<br />list.
             </h2>
             <p className="mt-3 max-w-md text-muted">
               First look at new arrivals, collection drops and private sales. No noise.

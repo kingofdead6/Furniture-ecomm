@@ -1,16 +1,19 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 
+// Typical footprints (cm) to help judge whether a piece fits a room. These are
+// indicative ranges — each product page lists that item's exact dimensions.
 const ROWS = [
-  { size: "XS", chest: "84–88", waist: "66–70", hip: "90–94" },
-  { size: "S", chest: "89–93", waist: "71–75", hip: "95–99" },
-  { size: "M", chest: "94–98", waist: "76–80", hip: "100–104" },
-  { size: "L", chest: "99–104", waist: "81–86", hip: "105–110" },
-  { size: "XL", chest: "105–110", waist: "87–92", hip: "111–116" },
+  { type: "2-seater sofa", w: "150–180", d: "85–95", h: "75–85" },
+  { type: "3-seater sofa", w: "200–230", d: "90–100", h: "75–85" },
+  { type: "Armchair", w: "70–90", d: "80–90", h: "75–95" },
+  { type: "Dining table (4)", w: "120–140", d: "80–90", h: "74–76" },
+  { type: "Dining table (6)", w: "180–200", d: "90–100", h: "74–76" },
+  { type: "Queen bed", w: "160–170", d: "210–215", h: "40–120" },
 ];
 
-// Accessible modal (Esc to close, backdrop click, focus-trap-lite) with a
-// generic apparel measurement table. Measurements in centimetres.
+// Accessible modal (Esc to close, backdrop click) — a furniture dimensions
+// helper. All measurements in centimetres.
 export default function SizeGuide({ open, onClose }) {
   useEffect(() => {
     if (!open) return;
@@ -31,7 +34,7 @@ export default function SizeGuide({ open, onClose }) {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Size guide"
+      aria-label="Dimensions guide"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -39,8 +42,8 @@ export default function SizeGuide({ open, onClose }) {
       >
         <div className="flex items-start justify-between">
           <div>
-            <p className="eyebrow text-clay">Fit</p>
-            <h2 className="display mt-1 text-3xl">Size guide</h2>
+            <p className="eyebrow text-clay">Measure up</p>
+            <h2 className="display mt-1 text-3xl">Dimensions guide</h2>
           </div>
           <button onClick={onClose} aria-label="Close" className="p-1 text-muted hover:text-ink">
             <X size={22} />
@@ -48,26 +51,26 @@ export default function SizeGuide({ open, onClose }) {
         </div>
 
         <p className="mt-4 text-sm text-muted">
-          Body measurements in centimetres. If you're between sizes, we recommend sizing up for a
-          relaxed fit.
+          Typical footprints in centimetres (W × D × H). Before ordering a large piece, measure your
+          space — and the doorways, hallways and stairwells it has to travel through.
         </p>
 
         <table className="mt-6 w-full text-sm">
           <thead>
             <tr className="border-b border-ink text-left">
-              <th className="py-2 font-semibold uppercase tracking-wide">Size</th>
-              <th className="py-2 font-semibold uppercase tracking-wide">Chest</th>
-              <th className="py-2 font-semibold uppercase tracking-wide">Waist</th>
-              <th className="py-2 font-semibold uppercase tracking-wide">Hip</th>
+              <th className="py-2 font-semibold uppercase tracking-wide">Piece</th>
+              <th className="py-2 font-semibold uppercase tracking-wide">Width</th>
+              <th className="py-2 font-semibold uppercase tracking-wide">Depth</th>
+              <th className="py-2 font-semibold uppercase tracking-wide">Height</th>
             </tr>
           </thead>
           <tbody>
             {ROWS.map((r) => (
-              <tr key={r.size} className="border-b border-line">
-                <td className="py-2.5 font-semibold">{r.size}</td>
-                <td className="py-2.5 text-muted">{r.chest}</td>
-                <td className="py-2.5 text-muted">{r.waist}</td>
-                <td className="py-2.5 text-muted">{r.hip}</td>
+              <tr key={r.type} className="border-b border-line">
+                <td className="py-2.5 font-semibold">{r.type}</td>
+                <td className="py-2.5 text-muted">{r.w}</td>
+                <td className="py-2.5 text-muted">{r.d}</td>
+                <td className="py-2.5 text-muted">{r.h}</td>
               </tr>
             ))}
           </tbody>

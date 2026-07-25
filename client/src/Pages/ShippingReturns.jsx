@@ -6,7 +6,14 @@ const SECTIONS = [
     title: "Delivery",
     body: [
       "We deliver across all 58 wilayas of Algeria. Your delivery cost is calculated at checkout based on your wilaya and whether you choose home delivery or collection from a pickup point.",
-      "Orders are dispatched within 1–2 business days. A member of our team will call to confirm your order before it ships.",
+      "In-stock accessories and smaller items are dispatched within 1–2 business days. Larger pieces — sofas, beds and dining tables — are made to order and typically arrive within 2–4 weeks. A member of our team will call to confirm your order and a delivery window before it ships.",
+    ],
+  },
+  {
+    title: "Assembly",
+    body: [
+      "Most pieces arrive flat-packed with clear instructions and the tools you need. Larger items are shipped part-assembled to keep them safe in transit.",
+      "In Alger, Oran and Constantine we can arrange in-home assembly on request — mention it when we call to confirm your order.",
     ],
   },
   {
@@ -17,16 +24,10 @@ const SECTIONS = [
     ],
   },
   {
-    title: "Returns",
+    title: "Returns & exchanges",
     body: [
-      "If something isn't right, you can return unworn pieces with their original tags within 14 days of delivery.",
-      "To start a return, contact us with your order number and we'll arrange collection or a drop-off point. Refunds are issued once we've received and inspected the piece.",
-    ],
-  },
-  {
-    title: "Exchanges",
-    body: [
-      "Need a different size or colour? Reach out within 14 days and, subject to availability, we'll exchange it for you. Delivery for the replacement follows the standard COD process.",
+      "If something isn't right, you can return unused pieces in their original packaging within 14 days of delivery. Made-to-order upholstery is final sale.",
+      "To start a return or exchange, contact us with your order number and we'll arrange collection. Refunds are issued once we've received and inspected the piece.",
     ],
   },
 ];

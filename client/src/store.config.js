@@ -5,41 +5,41 @@
 // file only — never the components.
 //
 // The whole look changes from the `theme` values below. `ink` is the near-black,
-// `bone` the off-white base, `clay` the single accent used sparingly.
+// `bone` the warm off-white base, `clay` the single accent (a deep sage green).
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const store = {
   brand: {
-    name: "ATELIER",
-    fullName: "Atelier Studio",
-    tagline: "Considered clothing, made to last. Cash on delivery across Algeria.",
-    logoText: "ATELIER",
+    name: "MAISON",
+    fullName: "Maison Interiors",
+    tagline: "Furniture made to live with. Considered pieces for the modern home, delivered across Algeria.",
+    logoText: "MAISON",
     logo: "/src/assets/Logo.png",
     favicon: "/src/assets/Logo.png",
   },
   niche: {
-    type: "clothing",
+    type: "furniture",
     productNoun: "piece",
     productNounPlural: "pieces",
   },
   theme: {
-    ink:   "#17130E",   // near-black — text, primary buttons/surfaces
-    bone:  "#F3EFE6",   // off-white page base
-    paper: "#E9E3D6",   // secondary surface / cards
-    clay:  "#B4471F",   // THE accent — links, one CTA, sale marks
-    muted: "#8A8272",   // secondary text
+    ink:   "#23201A",   // warm espresso near-black — text, primary buttons/surfaces
+    bone:  "#F2EDE4",   // warm ivory page base
+    paper: "#E7E0D2",   // secondary surface / cards
+    clay:  "#4F5D44",   // THE accent — deep sage green: links, one CTA, sale marks
+    muted: "#857C6A",   // secondary text
 
     // Legacy aliases kept so nothing referencing the old names breaks.
-    primary:   "#17130E",
-    secondary: "#B4471F",
-    accent:    "#B4471F",
+    primary:   "#23201A",
+    secondary: "#4F5D44",
+    accent:    "#4F5D44",
   },
   contact: {
-    email:    "hello@atelier.dz",
-    phone:    "+213 555 010 203",
-    phoneHref: "+213555010203",
-    whatsapp: "213555010203",
-    address:  "12 Rue Didouche Mourad, Alger, Algeria",
+    email:    "hello@maison.dz",
+    phone:    "+213 555 070 809",
+    phoneHref: "+213555070809",
+    whatsapp: "213555070809",
+    address:  "24 Rue Larbi Ben M'hidi, Alger, Algeria",
   },
   social: {
     instagram: "https://instagram.com",
@@ -53,8 +53,8 @@ export const store = {
     lang:           "en",
   },
   seo: {
-    title:       "ATELIER — Considered Clothing",
-    description: "Considered clothing, made to last. Outerwear, knitwear and essentials. Cash on delivery across Algeria.",
+    title:       "MAISON — Furniture for the Modern Home",
+    description: "Considered furniture and lighting for the modern home — sofas, tables, storage and more. Cash on delivery across Algeria.",
     ogImage:     "/src/assets/Logo.png",
   },
 };

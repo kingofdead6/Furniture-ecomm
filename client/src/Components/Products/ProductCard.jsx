@@ -77,7 +77,7 @@ export default function ProductCard({ product }) {
       </div>
 
       <div className="mt-4">
-        <p className="eyebrow">{product.category?.name || "Atelier"}</p>
+        <p className="eyebrow">{product.category?.name || "Maison"}</p>
         <h3 className="mt-1 font-display text-lg leading-tight">
           <Link to={`/products/${product._id}`} className="link-underline">
             {product.name}

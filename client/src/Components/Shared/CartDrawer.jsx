@@ -22,12 +22,12 @@ export default function CartDrawer({ open, onClose }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[120]" role="dialog" aria-modal="true" aria-label="Shopping bag">
+    <div className="fixed inset-0 z-[120]" role="dialog" aria-modal="true" aria-label="Shopping cart">
       <div className="absolute inset-0 bg-ink/40 [animation:fadeIn_.25s]" onClick={onClose} />
       <aside className="absolute inset-y-0 right-0 flex w-[min(440px,94vw)] flex-col bg-bone [animation:drawerIn_.35s_var(--ease)]">
         <div className="flex items-center justify-between border-b border-line px-6 py-5">
           <h2 className="font-display text-2xl">
-            Shopping bag <span className="text-base text-muted">({count})</span>
+            Shopping cart <span className="text-base text-muted">({count})</span>
           </h2>
           <button onClick={onClose} aria-label="Close cart" className="p-1 text-muted hover:text-ink">
             <X size={22} />
@@ -36,7 +36,7 @@ export default function CartDrawer({ open, onClose }) {
 
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-            <p className="font-display text-2xl">Your bag is empty</p>
+            <p className="font-display text-2xl">Your cart is empty</p>
             <p className="mt-2 text-sm text-muted">Add pieces you love and they'll appear here.</p>
             <Link
               to="/products"

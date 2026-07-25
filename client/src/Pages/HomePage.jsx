@@ -8,8 +8,8 @@ import Marquee from "../Components/Shared/Marquee";
 import ProductCard from "../Components/Products/ProductCard";
 import { ProductGridSkeleton } from "../Components/Shared/States";
 
-const HERO = "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1400&q=80";
-const EDITORIAL = "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=80";
+const HERO = "https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=1400&q=80";
+const EDITORIAL = "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=1200&q=80";
 
 export default function HomePage() {
   const [featured, setFeatured] = useState([]);
@@ -46,11 +46,11 @@ export default function HomePage() {
       {/* ── HERO — asymmetric, type-led ── */}
       <section className="mx-auto grid max-w-[1400px] items-end gap-8 px-5 pb-8 pt-10 md:grid-cols-12 md:px-8 md:pt-16">
         <div className="md:col-span-6 md:pb-10">
-          <p className="eyebrow fade-up text-clay" style={{ animationDelay: "60ms" }}>Autumn / Winter 2025</p>
+          <p className="eyebrow fade-up text-clay" style={{ animationDelay: "60ms" }}>New Season · 2025</p>
           <h1 className="display fade-up mt-5 text-[clamp(3rem,10vw,7.5rem)]" style={{ animationDelay: "140ms" }}>
-            Quiet<br />
-            clothes for<br />
-            <span className="italic">loud</span> lives.
+            Furniture<br />
+            made to<br />
+            <span className="italic">live</span> with.
           </h1>
           <p className="fade-up mt-6 max-w-md text-muted" style={{ animationDelay: "300ms" }}>{store.brand.tagline}</p>
           <div className="fade-up mt-8 flex flex-wrap items-center gap-4" style={{ animationDelay: "420ms" }}>
@@ -58,24 +58,24 @@ export default function HomePage() {
               to="/products"
               className="group inline-flex items-center gap-3 bg-ink px-8 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-bone btn-solid"
             >
-              Shop the collection
+              Shop everything
               <ArrowRight size={16} className="btn-arrow" />
             </Link>
             <Link to="/collections" className="link-underline text-xs font-semibold uppercase tracking-[0.16em]">
-              View lookbook
+              View collections
             </Link>
           </div>
         </div>
         <div className="md:col-span-6">
           <div className="card-media fade-up aspect-[4/5] w-full overflow-hidden bg-paper md:aspect-[3/4]" style={{ animationDelay: "220ms" }}>
-            <img src={HERO} alt="Atelier AW25 campaign" className="h-full w-full object-cover" />
+            <img src={HERO} alt="Maison living room" className="h-full w-full object-cover" />
           </div>
         </div>
       </section>
 
       {/* ── MARQUEE — the memorable moment ── */}
       <section className="border-y border-line py-6">
-        <Marquee items={["New Arrivals", "Considered Basics", "Made to Last", "Cash on Delivery"]} />
+        <Marquee items={["New Arrivals", "Solid Timber", "Made to Last", "Cash on Delivery"]} />
       </section>
 
       {/* ── FEATURED PRODUCTS ── */}
@@ -86,7 +86,7 @@ export default function HomePage() {
             <h2 className="display mt-2 text-[clamp(2rem,5vw,3.5rem)]">New this season</h2>
           </div>
           <Link to="/products" className="link-underline hidden text-xs font-semibold uppercase tracking-[0.16em] md:inline-block">
-            All pieces
+            Shop all
           </Link>
         </Reveal>
 
@@ -163,8 +163,8 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-[1400px] gap-10 px-5 py-24 md:grid-cols-12 md:px-8">
           <Reveal className="md:col-span-7 md:col-start-1">
             <p className="display text-[clamp(1.8rem,4vw,3rem)] leading-[1.1]">
-              We make a small number of things, considered down to the seam — cut from honest
-              materials, in colours that don't shout. Buy less. Keep it longer.
+              We make a small number of things, considered down to the joinery — built from honest
+              materials, in tones that settle into a room. Buy well. Keep it for years.
             </p>
             <Link to="/about" className="link-underline mt-8 inline-block text-xs font-semibold uppercase tracking-[0.16em]">
               Read our story

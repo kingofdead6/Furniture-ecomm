@@ -2,22 +2,22 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   ATELIER — editorial design system.
-   Bone base, near-black ink, ONE clay accent. Fraunces (display serif) does the
+   MAISON — editorial design system.
+   Warm ivory base, espresso ink, ONE sage-green accent. Fraunces (display serif) does the
    heavy lifting; Archivo carries the UI. All brand colours are overwritten at
    runtime from src/store.config.js (see applyStoreConfig.js) so the config file
    stays the single source of truth.
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --ink:   #17130E;   /* near-black warm ink — text, primary surfaces */
-  --bone:  #F3EFE6;   /* off-white page base */
-  --paper: #E9E3D6;   /* secondary surface / cards */
-  --clay:  #B4471F;   /* the single accent — links, one CTA, sale marks */
-  --muted: #8A8272;   /* secondary text */
-  --line:  rgba(23, 19, 14, 0.14);   /* hairline rules */
-  --line-strong: rgba(23, 19, 14, 0.28);
-  --clay-rgb: 180 71 31;
-  --ink-rgb: 23 19 14;
+  --ink:   #23201A;   /* warm espresso near-black — text, primary surfaces */
+  --bone:  #F2EDE4;   /* warm ivory page base */
+  --paper: #E7E0D2;   /* secondary surface / cards */
+  --clay:  #4F5D44;   /* the single accent — deep sage green: links, one CTA, sale marks */
+  --muted: #857C6A;   /* secondary text */
+  --line:  rgba(35, 32, 26, 0.14);   /* hairline rules */
+  --line-strong: rgba(35, 32, 26, 0.26);
+  --clay-rgb: 79 93 68;
+  --ink-rgb: 35 32 26;
 
   /* Legacy aliases so any stray reference keeps resolving to the new palette. */
   --primary: var(--ink);

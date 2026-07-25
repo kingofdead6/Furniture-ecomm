@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // STORE SETUP — one-shot script that:
 //   1. Creates (or updates) an admin account.
-//   2. Fills the store with a realistic clothing catalog: categories, ~24
-//      products with size/colour variants, collections, coupons, delivery
-//      areas, and a couple of reviews.
+//   2. Fills the store with a realistic furniture catalog: categories, ~24
+//      products with finish/configuration variants, collections, coupons,
+//      delivery areas, and a couple of reviews.
 //   3. Guarantees WORKING product imagery: every candidate image URL is checked
 //      over the network first, and anything unreachable is swapped for a
 //      deterministic fallback image — so no product is ever left with a broken
@@ -14,7 +14,7 @@
 //
 // Environment (a .env file in /server is read automatically):
 //   MONGO_URI          (required) MongoDB connection string
-//   ADMIN_EMAIL        admin login email      (default admin@atelier.dz)
+//   ADMIN_EMAIL        admin login email      (default admin@maison.dz)
 //   ADMIN_PASSWORD     admin password         (default changeme123)
 //   ADMIN_NAME         admin display name     (default Store Admin)
 //   SKIP_IMAGE_CHECK   set to "1" to skip the network image check (faster)
@@ -40,17 +40,15 @@ dotenv.config();
 // ── Admin (configurable via env) ─────────────────────────────────────────────
 const ADMIN = {
   name: process.env.ADMIN_NAME || 'Store Admin',
-  email: (process.env.ADMIN_EMAIL || 'admin@atelier.dz').toLowerCase(),
+  email: (process.env.ADMIN_EMAIL || 'admin@maison.dz').toLowerCase(),
   password: process.env.ADMIN_PASSWORD || 'changeme123',
   usertype: 'superadmin',
 };
 
 // ── Image helpers ────────────────────────────────────────────────────────────
-const unsplash = (id) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=80`;
-// Deterministic, always-available fallback (real photography, keyed by seed).
+const unsplash = (id) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1000&q=80`;
 const fallback = (seed, n) => `https://picsum.photos/seed/${seed}-${n}/900/1200`;
 
-// Reachability check with a timeout. Returns true only on a 2xx response.
 async function urlWorks(url, timeout = 9000) {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), timeout);
@@ -64,7 +62,6 @@ async function urlWorks(url, timeout = 9000) {
   }
 }
 
-// Verify a set of URLs with limited concurrency; returns a Set of working ones.
 async function verifyAll(urls) {
   const unique = [...new Set(urls)];
   const working = new Set();
@@ -80,214 +77,232 @@ async function verifyAll(urls) {
   return working;
 }
 
-// ── Catalog data ─────────────────────────────────────────────────────────────
-// Each product lists candidate Unsplash IDs (primary first). At runtime we keep
-// the ones that actually load and fall back to a deterministic image otherwise.
+// ── Categories ───────────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { name: 'Outerwear', description: 'Coats, trenches and parkas built to last.' },
-  { name: 'Knitwear', description: 'Crew necks, cardigans and merino turtlenecks.' },
-  { name: 'Shirting', description: 'Considered shirts and overshirts.' },
-  { name: 'Trousers', description: 'Tailored trousers, denim and chinos.' },
-  { name: 'T-Shirts', description: 'Heavyweight cotton, cut to a clean line.' },
-  { name: 'Dresses', description: 'Midi and slip silhouettes for every season.' },
-  { name: 'Footwear', description: 'Boots, sneakers and hand-finished loafers.' },
-  { name: 'Accessories', description: 'Bags, scarves, belts and caps.' },
+  { name: 'Sofas', description: 'Sofas, loveseats and modular seating for the living room.' },
+  { name: 'Chairs', description: 'Dining chairs, armchairs and accent seating.' },
+  { name: 'Tables', description: 'Dining, coffee and side tables in solid timber and stone.' },
+  { name: 'Beds', description: 'Bed frames and headboards for a restful bedroom.' },
+  { name: 'Storage', description: 'Sideboards, shelving and bedside storage.' },
+  { name: 'Lighting', description: 'Pendants, floor and table lamps with a warm glow.' },
+  { name: 'Decor', description: 'Rugs, cushions and ceramics to finish a room.' },
+  { name: 'Outdoor', description: 'Weather-ready seating and tables for the garden.' },
 ];
 
-const COLORWAYS = {
-  bone: { color: 'Bone', hex: '#E7E1D3' },
-  ink: { color: 'Ink', hex: '#1B1712' },
-  clay: { color: 'Clay', hex: '#B4471F' },
-  olive: { color: 'Olive', hex: '#5C5A3E' },
-  stone: { color: 'Stone', hex: '#9B9384' },
-  navy: { color: 'Navy', hex: '#26303F' },
-  ecru: { color: 'Ecru', hex: '#D9CFBA' },
-  charcoal: { color: 'Charcoal', hex: '#3A3733' },
+// ── Finishes (stored in the variant "color" field; the swatch uses colorHex) ──
+const FINISHES = {
+  oatmeal: { color: 'Oatmeal', hex: '#D9CFB8' },
+  sage: { color: 'Sage', hex: '#7C8768' },
+  charcoal: { color: 'Charcoal', hex: '#3A3A38' },
+  oak: { color: 'Oak', hex: '#C9A876' },
+  walnut: { color: 'Walnut', hex: '#5A3E2B' },
+  black: { color: 'Black', hex: '#23201A' },
+  brass: { color: 'Brass', hex: '#B08D4C' },
+  white: { color: 'White', hex: '#EFEBE2' },
+  terracotta: { color: 'Terracotta', hex: '#B5623F' },
+  natural: { color: 'Natural', hex: '#B79A6E' },
+  cream: { color: 'Cream', hex: '#E8DFC9' },
+  rust: { color: 'Rust', hex: '#A6572F' },
 };
-const SIZES_APPAREL = ['XS', 'S', 'M', 'L', 'XL'];
-const SIZES_SHOE = ['39', '40', '41', '42', '43', '44'];
+
+const SIZE = {
+  seater: ['2-Seater', '3-Seater'],
+  one: ['One Size'],
+  dining: ['4-Seat', '6-Seat'],
+  bed: ['Queen', 'King'],
+  rug: ['170 × 240', '200 × 300'],
+};
 
 let skuCounter = 1000;
-function makeVariants(colorKeys, sizes, stockEach = 10) {
+function makeVariants(finishKeys, sizes, stockEach = 6, demoSoldOut = false) {
   const variants = [];
-  for (const key of colorKeys) {
-    const c = COLORWAYS[key];
-    for (const size of sizes) {
+  finishKeys.forEach((key, fi) => {
+    const f = FINISHES[key];
+    sizes.forEach((size, si) => {
       skuCounter += 1;
       variants.push({
         size,
-        color: c.color,
-        colorHex: c.hex,
-        sku: `ATL-${skuCounter}`,
-        stock: size === 'XS' && key === colorKeys[0] ? 0 : stockEach, // one sold-out demo state
+        color: f.color,
+        colorHex: f.hex,
+        sku: `MSN-${skuCounter}`,
+        stock: demoSoldOut && fi === 0 && si === 0 ? 0 : stockEach,
       });
-    }
-  }
+    });
+  });
   return variants;
 }
 
-// candidateIds: several Unsplash photo ids per product (fashion / apparel).
+// candidate Unsplash ids (interiors / furniture), primary first.
 const PRODUCTS = [
-  { name: 'Wool Overcoat', cat: 'Outerwear', gender: 'women', price: 28900, featured: true,
-    ids: ['1544923246-77307dd654cb', '1591047139829-d91aecb6caea', '1539533018447-63fcce2678e3'],
-    colors: ['ink', 'stone'], sizes: SIZES_APPAREL,
-    description: 'A double-faced wool overcoat with a clean, collarless line and a concealed placket.',
-    material: '80% virgin wool, 20% cashmere.', care: 'Dry clean only.' },
-  { name: 'Belted Trench', cat: 'Outerwear', gender: 'unisex', price: 24500, compareAt: 29000, featured: true,
-    ids: ['1520975954732-35dd22299614', '1548624313-0396c75f8f1d', '1434389677669-e08b4cac3105'],
-    colors: ['bone', 'olive'], sizes: SIZES_APPAREL,
-    description: 'The archetypal trench, rendered in a water-repellent cotton gabardine.',
-    material: '100% cotton gabardine.', care: 'Dry clean.' },
-  { name: 'Utility Parka', cat: 'Outerwear', gender: 'men', price: 21000,
-    ids: ['1578681994506-b8f463449011', '1591047139829-d91aecb6caea', '1607345366928-199ea26cfe3e'],
-    colors: ['olive', 'ink'], sizes: SIZES_APPAREL,
-    description: 'A relaxed parka with bellows pockets and a drawcord waist.',
-    material: '100% organic cotton ripstop.', care: 'Machine wash cold.' },
+  // Sofas
+  { name: 'Linen Three-Seater Sofa', cat: 'Sofas', price: 128000, featured: true, soldOut: true,
+    ids: ['1555041469-a586c61ea9bc', '1493663284031-b7e3aefcae8e', '1616486338812-3dadae4b4ace'],
+    finishes: ['oatmeal', 'sage', 'charcoal'], sizes: SIZE.seater,
+    description: 'A deep, feather-filled sofa in washed linen with a low, relaxed back.',
+    material: 'Washed linen upholstery, kiln-dried hardwood frame, feather-wrapped foam cushions.',
+    care: 'Vacuum regularly; spot clean with a damp cloth. Rotate cushions to wear evenly.' },
+  { name: 'Modular Corner Sofa', cat: 'Sofas', price: 168000, compareAt: 195000,
+    ids: ['1493663284031-b7e3aefcae8e', '1555041469-a586c61ea9bc', '1616627988744-9f4f3b6f2c1e'],
+    finishes: ['oatmeal', 'charcoal'], sizes: SIZE.seater,
+    description: 'A configurable corner sofa you can rearrange as your room changes.',
+    material: 'Boucle upholstery, hardwood frame, high-resilience foam.', care: 'Spot clean only.' },
+  { name: 'Bouclé Loveseat', cat: 'Sofas', price: 96000, featured: true,
+    ids: ['1616627988744-9f4f3b6f2c1e', '1493663284031-b7e3aefcae8e', '1555041469-a586c61ea9bc'],
+    finishes: ['cream', 'sage'], sizes: SIZE.one,
+    description: 'A compact two-seater in textured bouclé — perfect for smaller rooms.',
+    material: 'Bouclé upholstery, solid beech legs.', care: 'Brush gently; spot clean.' },
 
-  { name: 'Merino Crew Knit', cat: 'Knitwear', gender: 'unisex', price: 9800, featured: true,
-    ids: ['1576871337622-98d48d1cf531', '1620012253295-c15cc3e65df4', '1618354691373-d851c5c3a990'],
-    colors: ['bone', 'clay', 'navy'], sizes: SIZES_APPAREL,
-    description: 'A fine-gauge merino crew neck that layers under everything.',
-    material: '100% extra-fine merino wool.', care: 'Hand wash cold, dry flat.' },
-  { name: 'Waffle Cardigan', cat: 'Knitwear', gender: 'women', price: 12500,
-    ids: ['1591047139829-d91aecb6caea', '1434389677669-e08b4cac3105', '1608234808654-2a8875faa7fd'],
-    colors: ['ecru', 'charcoal'], sizes: SIZES_APPAREL,
-    description: 'An oversized waffle-knit cardigan with horn buttons.',
-    material: '70% cotton, 30% wool.', care: 'Hand wash cold.' },
-  { name: 'Ribbed Turtleneck', cat: 'Knitwear', gender: 'women', price: 8900,
-    ids: ['1608234808654-2a8875faa7fd', '1618354691373-d851c5c3a990', '1576871337622-98d48d1cf531'],
-    colors: ['ink', 'bone', 'clay'], sizes: SIZES_APPAREL,
-    description: 'A close-fitting ribbed turtleneck in soft lambswool.',
-    material: '100% lambswool.', care: 'Hand wash cold, dry flat.' },
+  // Chairs
+  { name: 'Oak Dining Chair', cat: 'Chairs', price: 16500, featured: true,
+    ids: ['1503602642458-232111445657', '1567538096630-e0c55bd6374c', '1533090161767-e6ffed986c88'],
+    finishes: ['oak', 'walnut', 'black'], sizes: SIZE.one,
+    description: 'A solid oak dining chair with a contoured seat and tapered legs.',
+    material: 'Solid oak, water-based lacquer.', care: 'Wipe with a soft dry cloth.' },
+  { name: 'Lounge Armchair', cat: 'Chairs', price: 38000,
+    ids: ['1567538096630-e0c55bd6374c', '1550226891-ef816aed4a98', '1499933374294-4584851497cc'],
+    finishes: ['sage', 'oatmeal', 'rust'], sizes: SIZE.one,
+    description: 'A sculptural armchair with a high back and gentle recline.',
+    material: 'Wool-blend upholstery, oak base.', care: 'Vacuum; spot clean.' },
+  { name: 'Cane Accent Chair', cat: 'Chairs', price: 24500,
+    ids: ['1533090161767-e6ffed986c88', '1503602642458-232111445657', '1567225557594-88d73e55f2cb'],
+    finishes: ['natural', 'walnut'], sizes: SIZE.one,
+    description: 'A woven cane accent chair that brings warmth to any corner.',
+    material: 'Rattan cane, solid ash frame.', care: 'Dust with a soft brush.' },
 
-  { name: 'Poplin Shirt', cat: 'Shirting', gender: 'men', price: 7500, featured: true,
-    ids: ['1596755094514-f87e34085b2c', '1602810318383-e386cc2a3ccf', '1603252109303-2751441dd157'],
-    colors: ['bone', 'navy'], sizes: SIZES_APPAREL,
-    description: 'A crisp cotton poplin shirt with a slightly relaxed body.',
-    material: '100% organic cotton poplin.', care: 'Machine wash warm.' },
-  { name: 'Striped Oxford', cat: 'Shirting', gender: 'unisex', price: 8200,
-    ids: ['1598033129183-c4f50c736f10', '1603252109303-2751441dd157', '1602810318383-e386cc2a3ccf'],
-    colors: ['bone', 'navy'], sizes: SIZES_APPAREL,
-    description: 'A washed oxford with a fine woven stripe and a button-down collar.',
-    material: '100% cotton oxford.', care: 'Machine wash cold.' },
-  { name: 'Wool Overshirt', cat: 'Shirting', gender: 'men', price: 13800,
-    ids: ['1607345366928-199ea26cfe3e', '1516257984-b1b4d707412e', '1578681994506-b8f463449011'],
-    colors: ['olive', 'charcoal'], sizes: SIZES_APPAREL,
-    description: 'A shirt-jacket in brushed wool — the third layer for cool days.',
-    material: '90% wool, 10% polyamide.', care: 'Dry clean.' },
+  // Tables
+  { name: 'Solid Oak Dining Table', cat: 'Tables', price: 118000, featured: true,
+    ids: ['1594026112284-02bb6f3352fe', '1533090161767-e6ffed986c88', '1449247709967-d4461a6a6103'],
+    finishes: ['oak', 'walnut'], sizes: SIZE.dining,
+    description: 'A generous dining table in solid oak with a hand-finished edge.',
+    material: 'Solid oak, natural oil finish.', care: 'Re-oil twice a year; wipe spills promptly.' },
+  { name: 'Travertine Coffee Table', cat: 'Tables', price: 74000, compareAt: 89000,
+    ids: ['1449247709967-d4461a6a6103', '1594026112284-02bb6f3352fe', '1524758631624-e2822e304c36'],
+    finishes: ['cream', 'natural'], sizes: SIZE.one,
+    description: 'A low coffee table carved from honed travertine stone.',
+    material: 'Natural travertine.', care: 'Seal annually; avoid acidic cleaners.' },
+  { name: 'Round Bistro Table', cat: 'Tables', price: 46000,
+    ids: ['1524758631624-e2822e304c36', '1594026112284-02bb6f3352fe', '1449247709967-d4461a6a6103'],
+    finishes: ['black', 'white'], sizes: SIZE.one,
+    description: 'A compact round table for two — breakfasts, coffees, card games.',
+    material: 'Powder-coated steel, oak top.', care: 'Wipe clean.' },
 
-  { name: 'Pleated Trouser', cat: 'Trousers', gender: 'women', price: 11500, featured: true,
-    ids: ['1594633312681-425c7b97ccd1', '1473966968600-fa801b869a1a', '1624378439575-d8705ad7ae80'],
-    colors: ['ink', 'stone'], sizes: SIZES_APPAREL,
-    description: 'A high-rise pleated trouser with a straight, fluid leg.',
-    material: '54% wool, 44% viscose, 2% elastane.', care: 'Dry clean.' },
-  { name: 'Selvedge Denim', cat: 'Trousers', gender: 'unisex', price: 13200, compareAt: 15000,
-    ids: ['1542272604-787c3835535d', '1541099649105-f69ad21f3246', '1473966968600-fa801b869a1a'],
-    colors: ['navy'], sizes: SIZES_APPAREL,
-    description: 'A mid-rise straight jean cut from Japanese selvedge denim.',
-    material: '100% cotton selvedge denim.', care: 'Machine wash cold, inside out.' },
-  { name: 'Cotton Chino', cat: 'Trousers', gender: 'men', price: 8900,
-    ids: ['1624378439575-d8705ad7ae80', '1473966968600-fa801b869a1a', '1594633312681-425c7b97ccd1'],
-    colors: ['bone', 'olive', 'ink'], sizes: SIZES_APPAREL,
-    description: 'A tapered chino in a peached cotton twill.',
-    material: '98% cotton, 2% elastane.', care: 'Machine wash warm.' },
+  // Beds
+  { name: 'Upholstered Bed Frame', cat: 'Beds', price: 98000, featured: true,
+    ids: ['1505693416388-ac5ce068fe85', '1522771739844-6a9f6d5f14af', '1611967164521-abae8fba4668'],
+    finishes: ['oatmeal', 'charcoal'], sizes: SIZE.bed,
+    description: 'A softly upholstered bed frame with a tall, channel-stitched headboard.',
+    material: 'Linen-blend upholstery, solid pine frame, sprung slats.', care: 'Vacuum; spot clean.' },
+  { name: 'Oak Platform Bed', cat: 'Beds', price: 112000,
+    ids: ['1522771739844-6a9f6d5f14af', '1505693416388-ac5ce068fe85', '1618220179428-22790b461013'],
+    finishes: ['oak', 'walnut'], sizes: SIZE.bed,
+    description: 'A low platform bed in solid oak with a floating base.',
+    material: 'Solid oak, natural oil finish.', care: 'Re-oil yearly.' },
+  { name: 'Rattan Headboard Bed', cat: 'Beds', price: 88000,
+    ids: ['1611967164521-abae8fba4668', '1505693416388-ac5ce068fe85', '1522771739844-6a9f6d5f14af'],
+    finishes: ['natural'], sizes: SIZE.bed,
+    description: 'A relaxed bed with a hand-woven rattan headboard.',
+    material: 'Rattan, solid ash frame.', care: 'Dust with a soft brush.' },
 
-  { name: 'Heavyweight Tee', cat: 'T-Shirts', gender: 'unisex', price: 4500, featured: true,
-    ids: ['1521572163474-6864f9cf17ab', '1583743814966-8936f5b7be1a', '1503341504253-dff4815485f1'],
-    colors: ['bone', 'ink', 'clay'], sizes: SIZES_APPAREL,
-    description: 'A boxy heavyweight tee with a clean, structured collar.',
-    material: '100% organic cotton, 240gsm.', care: 'Machine wash cold.' },
-  { name: 'Pima Pocket Tee', cat: 'T-Shirts', gender: 'men', price: 4900,
-    ids: ['1503341504253-dff4815485f1', '1521572163474-6864f9cf17ab', '1583743814966-8936f5b7be1a'],
-    colors: ['ink', 'stone'], sizes: SIZES_APPAREL,
-    description: 'A softer everyday tee in long-staple Pima cotton with a chest pocket.',
-    material: '100% Pima cotton.', care: 'Machine wash cold.' },
-  { name: 'Long-Sleeve Tee', cat: 'T-Shirts', gender: 'women', price: 5500,
-    ids: ['1583743814966-8936f5b7be1a', '1521572163474-6864f9cf17ab', '1503341504253-dff4815485f1'],
-    colors: ['bone', 'clay', 'olive'], sizes: SIZES_APPAREL,
-    description: 'A slim long-sleeve tee that sits close without clinging.',
-    material: '95% cotton, 5% elastane.', care: 'Machine wash cold.' },
+  // Storage
+  { name: 'Walnut Sideboard', cat: 'Storage', price: 86000, featured: true,
+    ids: ['1616627988744-9f4f3b6f2c1e', '1538688525198-9b88f6f53126', '1586023492125-27b2c045efd7'],
+    finishes: ['walnut', 'oak'], sizes: SIZE.one,
+    description: 'A long sideboard with soft-close doors and cable management.',
+    material: 'Walnut veneer, solid timber legs.', care: 'Wipe with a soft dry cloth.' },
+  { name: 'Oak Bookshelf', cat: 'Storage', price: 62000,
+    ids: ['1586023492125-27b2c045efd7', '1538688525198-9b88f6f53126', '1616627988744-9f4f3b6f2c1e'],
+    finishes: ['oak', 'black'], sizes: SIZE.one,
+    description: 'An open bookshelf with five adjustable shelves.',
+    material: 'Solid oak, steel supports.', care: 'Dust regularly.' },
+  { name: 'Bedside Table', cat: 'Storage', price: 22000,
+    ids: ['1538688525198-9b88f6f53126', '1586023492125-27b2c045efd7', '1616627988744-9f4f3b6f2c1e'],
+    finishes: ['oak', 'walnut', 'white'], sizes: SIZE.one,
+    description: 'A two-drawer bedside table sized for small bedrooms.',
+    material: 'Oak veneer, solid oak legs.', care: 'Wipe clean.' },
 
-  { name: 'Cupro Slip Dress', cat: 'Dresses', gender: 'women', price: 14900, featured: true,
-    ids: ['1539008835657-9e8e9680c956', '1595777457583-95e059d581b8', '1502716119720-b23a93e5fe1b'],
-    colors: ['stone', 'ink'], sizes: SIZES_APPAREL,
-    description: 'A bias-cut slip dress with a fluid drape and adjustable straps.',
-    material: '100% cupro.', care: 'Hand wash cold.' },
-  { name: 'Poplin Midi Dress', cat: 'Dresses', gender: 'women', price: 16500,
-    ids: ['1595777457583-95e059d581b8', '1566174053879-31528523f8ae', '1539008835657-9e8e9680c956'],
-    colors: ['bone', 'navy'], sizes: SIZES_APPAREL,
-    description: 'A gathered-waist midi dress in crisp cotton poplin.',
-    material: '100% cotton poplin.', care: 'Machine wash cold.' },
-  { name: 'Knit Tank Dress', cat: 'Dresses', gender: 'women', price: 12900,
-    ids: ['1566174053879-31528523f8ae', '1502716119720-b23a93e5fe1b', '1595777457583-95e059d581b8'],
-    colors: ['clay', 'charcoal'], sizes: SIZES_APPAREL,
-    description: 'A ribbed knit column dress that skims the body.',
-    material: '80% viscose, 20% polyester.', care: 'Hand wash cold.' },
+  // Lighting
+  { name: 'Paper Pendant Lamp', cat: 'Lighting', price: 12500, featured: true,
+    ids: ['1513506003901-1e6a229e2d15', '1540932239986-30128078f3c5', '1517705008128-361805f42e86'],
+    finishes: ['white', 'cream'], sizes: SIZE.one,
+    description: 'A large rice-paper pendant that casts a soft, diffuse glow.',
+    material: 'Rice paper, steel frame.', care: 'Dust gently; keep dry.' },
+  { name: 'Arc Floor Lamp', cat: 'Lighting', price: 28000,
+    ids: ['1540932239986-30128078f3c5', '1513506003901-1e6a229e2d15', '1517705008128-361805f42e86'],
+    finishes: ['brass', 'black'], sizes: SIZE.one,
+    description: 'A sweeping arc floor lamp that reaches over a sofa or reading chair.',
+    material: 'Powder-coated steel, brass detailing, marble base.', care: 'Wipe clean.' },
+  { name: 'Ceramic Table Lamp', cat: 'Lighting', price: 14500,
+    ids: ['1517705008128-361805f42e86', '1540932239986-30128078f3c5', '1513506003901-1e6a229e2d15'],
+    finishes: ['cream', 'terracotta'], sizes: SIZE.one,
+    description: 'A hand-thrown ceramic lamp with a linen shade.',
+    material: 'Glazed ceramic, linen shade.', care: 'Dust the shade; wipe the base.' },
 
-  { name: 'Leather Chelsea Boot', cat: 'Footwear', gender: 'unisex', price: 22000, featured: true,
-    ids: ['1608256246200-53e635b5b65f', '1533867617858-e7b97e060509', '1614252369475-531eba835eb1'],
-    colors: ['ink'], sizes: SIZES_SHOE,
-    description: 'A hand-lasted Chelsea boot on a lightweight rubber sole.',
-    material: 'Full-grain calf leather, rubber sole.', care: 'Wipe clean, condition regularly.' },
-  { name: 'Court Sneaker', cat: 'Footwear', gender: 'unisex', price: 15500, compareAt: 18000,
-    ids: ['1595950653106-6c9ebd614d3a', '1600185365483-26d7a4cc7519', '1549298916-b41d501d3772'],
-    colors: ['bone'], sizes: SIZES_SHOE,
-    description: 'A minimal low-top sneaker in tumbled leather.',
-    material: 'Leather upper, rubber cup sole.', care: 'Wipe clean.' },
-  { name: 'Suede Loafer', cat: 'Footwear', gender: 'women', price: 17800,
-    ids: ['1533867617858-e7b97e060509', '1614252369475-531eba835eb1', '1608256246200-53e635b5b65f'],
-    colors: ['clay', 'ink'], sizes: SIZES_SHOE,
-    description: 'A hand-finished penny loafer in soft suede.',
-    material: 'Suede upper, leather sole.', care: 'Brush clean, protect from water.' },
+  // Decor
+  { name: 'Wool Area Rug', cat: 'Decor', price: 42000, featured: true,
+    ids: ['1526057565006-20beab8dd2ed', '1600166898405-da9535204843', '1584100936595-c0654b55a2e2'],
+    finishes: ['oatmeal', 'sage', 'terracotta'], sizes: SIZE.rug,
+    description: 'A hand-tufted wool rug with a subtle low pile.',
+    material: '100% wool pile, cotton backing.', care: 'Professional clean; rotate to wear evenly.' },
+  { name: 'Linen Cushion', cat: 'Decor', price: 4800,
+    ids: ['1600166898405-da9535204843', '1526057565006-20beab8dd2ed', '1584100936595-c0654b55a2e2'],
+    finishes: ['sage', 'oatmeal', 'rust', 'terracotta'], sizes: SIZE.one,
+    description: 'A stonewashed linen cushion with a feather insert.',
+    material: 'Washed linen cover, feather insert.', care: 'Machine wash cover cold.' },
+  { name: 'Ceramic Vase', cat: 'Decor', price: 6500,
+    ids: ['1584100936595-c0654b55a2e2', '1600166898405-da9535204843', '1526057565006-20beab8dd2ed'],
+    finishes: ['cream', 'terracotta', 'sage'], sizes: SIZE.one,
+    description: 'A sculptural stoneware vase, thrown by hand.',
+    material: 'Glazed stoneware.', care: 'Hand wash; not dishwasher safe.' },
 
-  { name: 'Structured Tote', cat: 'Accessories', gender: 'unisex', price: 18500, featured: true,
-    ids: ['1590874103328-eac38a683ce7', '1584917865442-de89df76afd3', '1548036328-c9fa89d128fa'],
-    colors: ['ink', 'clay'], sizes: ['One Size'],
-    description: 'A structured leather tote that holds its shape, day to day.',
-    material: 'Vegetable-tanned leather.', care: 'Wipe clean, condition regularly.' },
-  { name: 'Wool Scarf', cat: 'Accessories', gender: 'unisex', price: 6500,
-    ids: ['1601924994987-69e26d50dc26', '1520903920243-00d872a2d1c9', '1457545195570-67f207084966'],
-    colors: ['bone', 'olive', 'navy'], sizes: ['One Size'],
-    description: 'An oversized brushed-wool scarf for the coldest months.',
-    material: '100% lambswool.', care: 'Dry clean.' },
-  { name: 'Cotton Cap', cat: 'Accessories', gender: 'unisex', price: 3900,
-    ids: ['1588850561407-ed78c282e89b', '1521369909029-2afed882baee', '1534215754734-18e55d13e346'],
-    colors: ['ink', 'bone', 'olive'], sizes: ['One Size'],
-    description: 'A six-panel cap in washed cotton twill with a curved brim.',
-    material: '100% cotton twill.', care: 'Spot clean.' },
+  // Outdoor
+  { name: 'Teak Outdoor Lounge', cat: 'Outdoor', price: 92000, featured: true,
+    ids: ['1600210492493-0946911123ea', '1592078615290-033ee584e267', '1595429035839-c99c298ffdde'],
+    finishes: ['natural'], sizes: SIZE.seater,
+    description: 'A weather-ready teak lounge chair with quick-dry cushions.',
+    material: 'Solid teak, quick-dry foam, outdoor fabric.', care: 'Oil teak seasonally; cover in winter.' },
+  { name: 'Rattan Garden Chair', cat: 'Outdoor', price: 34000, compareAt: 41000,
+    ids: ['1592078615290-033ee584e267', '1600210492493-0946911123ea', '1595429035839-c99c298ffdde'],
+    finishes: ['natural', 'charcoal'], sizes: SIZE.one,
+    description: 'A stackable all-weather rattan chair for balconies and gardens.',
+    material: 'PE rattan, powder-coated aluminium frame.', care: 'Hose clean; dry before storing.' },
+  { name: 'Folding Bistro Set', cat: 'Outdoor', price: 30000,
+    ids: ['1595429035839-c99c298ffdde', '1600210492493-0946911123ea', '1592078615290-033ee584e267'],
+    finishes: ['sage', 'black'], sizes: SIZE.one,
+    description: 'A folding table and two chairs for compact outdoor spaces.',
+    material: 'Powder-coated steel.', care: 'Wipe clean; fold flat to store.' },
 ];
 
 const COLLECTIONS = [
-  { name: 'Autumn / Winter 25', season: 'AW25', subtitle: 'The cold-weather edit', featured: true, order: 1,
-    heroId: '1490481651871-ab68de25d43d',
-    description: 'Layered tailoring, brushed wool and quiet colour for the months ahead.',
-    productNames: ['Wool Overcoat', 'Belted Trench', 'Merino Crew Knit', 'Wool Scarf', 'Leather Chelsea Boot'] },
-  { name: 'The Essentials', season: 'Core', subtitle: 'Pieces you reach for first', featured: true, order: 2,
-    heroId: '1521572163474-6864f9cf17ab',
-    description: 'The permanent collection — considered basics that anchor a wardrobe.',
-    productNames: ['Heavyweight Tee', 'Poplin Shirt', 'Cotton Chino', 'Court Sneaker'] },
-  { name: 'Studio Neutrals', season: 'Core', subtitle: 'A palette of bone, stone and ink', featured: false, order: 3,
-    heroId: '1483985988355-763728e1935b',
-    description: "A tonal study in restraint — everything works with everything.",
-    productNames: ['Pleated Trouser', 'Ribbed Turtleneck', 'Cupro Slip Dress', 'Structured Tote'] },
+  { name: 'The Living Room Edit', season: 'Featured', subtitle: 'Everything for a room you want to stay in', featured: true, order: 1,
+    heroId: '1524758631624-e2822e304c36',
+    description: 'Sink-in sofas, a stone coffee table and warm lighting — a living room built around comfort.',
+    productNames: ['Linen Three-Seater Sofa', 'Travertine Coffee Table', 'Lounge Armchair', 'Wool Area Rug', 'Arc Floor Lamp'] },
+  { name: 'Warm Minimalism', season: 'Core', subtitle: 'Honest timber, clean lines', featured: true, order: 2,
+    heroId: '1538688525198-9b88f6f53126',
+    description: 'Solid oak and walnut, pared back to the essentials — pieces that age beautifully.',
+    productNames: ['Solid Oak Dining Table', 'Oak Dining Chair', 'Walnut Sideboard', 'Oak Platform Bed'] },
+  { name: 'Small Spaces', season: 'Core', subtitle: 'Made to fit', featured: false, order: 3,
+    heroId: '1586023492125-27b2c045efd7',
+    description: 'Compact seating, folding tables and clever storage for apartments and studios.',
+    productNames: ['Bouclé Loveseat', 'Round Bistro Table', 'Bedside Table', 'Folding Bistro Set'] },
 ];
 
 const COUPONS = [
   { code: 'WELCOME10', type: 'percent', value: 10, minSubtotal: 0, active: true },
-  { code: 'ATELIER500', type: 'fixed', value: 500, minSubtotal: 5000, active: true },
-  { code: 'FREESHIP', type: 'free_shipping', value: 0, minSubtotal: 10000, active: true },
+  { code: 'MAISON5000', type: 'fixed', value: 5000, minSubtotal: 60000, active: true },
+  { code: 'FREESHIP', type: 'free_shipping', value: 0, minSubtotal: 80000, active: true },
 ];
 
 const DELIVERY_AREAS = [
-  { wilaya: 'Alger', priceHome: 500, priceDesk: 350, desks: [{ name: 'Alger Centre' }, { name: 'Bab Ezzouar' }, { name: 'Hydra' }] },
-  { wilaya: 'Oran', priceHome: 600, priceDesk: 400, desks: [{ name: 'Oran Centre' }, { name: 'Es Sénia' }] },
-  { wilaya: 'Constantine', priceHome: 650, priceDesk: 450, desks: [{ name: 'Constantine Centre' }, { name: 'El Khroub' }] },
-  { wilaya: 'Blida', priceHome: 550, priceDesk: 400, desks: [{ name: 'Blida Centre' }] },
-  { wilaya: 'Annaba', priceHome: 700, priceDesk: 500, desks: [{ name: 'Annaba Centre' }] },
-  { wilaya: 'Sétif', priceHome: 650, priceDesk: 450, desks: [{ name: 'Sétif Centre' }] },
+  { wilaya: 'Alger', priceHome: 1500, priceDesk: 900, desks: [{ name: 'Alger Centre' }, { name: 'Bab Ezzouar' }, { name: 'Hydra' }] },
+  { wilaya: 'Oran', priceHome: 2000, priceDesk: 1200, desks: [{ name: 'Oran Centre' }, { name: 'Es Sénia' }] },
+  { wilaya: 'Constantine', priceHome: 2200, priceDesk: 1400, desks: [{ name: 'Constantine Centre' }, { name: 'El Khroub' }] },
+  { wilaya: 'Blida', priceHome: 1800, priceDesk: 1100, desks: [{ name: 'Blida Centre' }] },
+  { wilaya: 'Annaba', priceHome: 2500, priceDesk: 1600, desks: [{ name: 'Annaba Centre' }] },
+  { wilaya: 'Sétif', priceHome: 2200, priceDesk: 1400, desks: [{ name: 'Sétif Centre' }] },
 ];
 
-const CUSTOMER = { name: 'Yasmine B.', email: 'customer@atelier.dz', phone: '+213 555 010 203', password: 'password123', usertype: 'user' };
+const CUSTOMER = { name: 'Nadia H.', email: 'customer@maison.dz', phone: '+213 555 070 809', password: 'password123', usertype: 'user' };
 
 async function run() {
   if (!process.env.MONGO_URI) {
@@ -295,9 +310,8 @@ async function run() {
     process.exit(1);
   }
 
-  // 1. Verify every candidate image once (unless skipped).
   const skipCheck = process.env.SKIP_IMAGE_CHECK === '1';
-  const allIds = [...new Set(PRODUCTS.flatMap((p) => p.ids))];
+  const allIds = [...new Set([...PRODUCTS.flatMap((p) => p.ids), ...COLLECTIONS.map((c) => c.heroId)])];
   let working = new Set(allIds.map(unsplash));
   if (!skipCheck) {
     console.log(`Checking ${allIds.length} candidate images…`);
@@ -307,8 +321,6 @@ async function run() {
     console.log('Skipping image reachability check (SKIP_IMAGE_CHECK=1).');
   }
 
-  // Build each product's final image list: keep working candidates, guarantee
-  // at least two images by topping up with deterministic fallbacks.
   function imagesFor(p) {
     const slug = slugify(p.name);
     const good = p.ids.map(unsplash).filter((u) => working.has(u));
@@ -325,7 +337,6 @@ async function run() {
   await mongoose.connect(process.env.MONGO_URI);
   console.log('MongoDB connected — setting up store…');
 
-  // 2. Admin + demo customer (upsert by email; never duplicated).
   let customerDoc;
   for (const acct of [ADMIN, CUSTOMER]) {
     let user = await User.findOne({ email: acct.email });
@@ -338,7 +349,6 @@ async function run() {
     if (acct === CUSTOMER) customerDoc = user;
   }
 
-  // 3. Clear catalog collections and rebuild.
   await Promise.all([
     Product.deleteMany({}),
     Category.deleteMany({}),
@@ -369,10 +379,9 @@ async function run() {
       compareAtPrice: p.compareAt || null,
       images: imagesFor(p),
       category: catByName[p.cat],
-      gender: p.gender,
       featured: !!p.featured,
       status: 'active',
-      variants: makeVariants(p.colors, p.sizes),
+      variants: makeVariants(p.finishes, p.sizes, 6, !!p.soldOut),
     });
     await doc.save(); // pre-save hook derives sizes/colors/stock
     productByName[p.name] = doc;
@@ -403,23 +412,24 @@ async function run() {
   console.log(`  Seeded ${DELIVERY_AREAS.length} delivery areas.`);
 
   const reviewSpecs = [
-    { product: 'Wool Overcoat', name: 'Sofia K.', rating: 5, title: 'Beautifully made', body: 'The wool is dense and the cut is perfect. Worth every dinar.' },
-    { product: 'Merino Crew Knit', name: 'Yasmine B.', rating: 5, title: 'Layering staple', body: 'Soft, not itchy, and the bone colour goes with everything.', customer: customerDoc?._id },
-    { product: 'Heavyweight Tee', name: 'Rania M.', rating: 4, title: 'Great weight', body: 'Structured and boxy exactly as described. Runs slightly large.' },
-    { product: 'Poplin Shirt', name: 'Karim D.', rating: 5, title: 'Crisp and clean', body: 'Holds a press well and the fabric feels substantial.' },
-    { product: 'Leather Chelsea Boot', name: 'Amine T.', rating: 4, title: 'Solid boot', body: 'Comfortable out of the box. Needed a day to break in the heel.' },
+    { product: 'Linen Three-Seater Sofa', name: 'Yacine B.', rating: 5, title: 'Incredibly comfortable', body: 'The linen is soft and the cushions keep their shape. Worth the wait.' },
+    { product: 'Solid Oak Dining Table', name: 'Nadia H.', rating: 5, title: 'A forever piece', body: 'Beautiful grain and rock solid. It will outlast us all.', customer: null },
+    { product: 'Oak Dining Chair', name: 'Sofiane K.', rating: 4, title: 'Sturdy and elegant', body: 'Comfortable for long dinners. Assembly took ten minutes.' },
+    { product: 'Paper Pendant Lamp', name: 'Amel T.', rating: 5, title: 'Lovely soft light', body: 'Casts a really warm glow in the evening. Bigger than I expected.' },
+    { product: 'Wool Area Rug', name: 'Karim D.', rating: 4, title: 'Thick and warm', body: 'Great underfoot. Shed a little at first, then settled.' },
   ];
   for (const r of reviewSpecs) {
     const prod = productByName[r.product];
     if (!prod) continue;
+    const isDemoCustomer = r.product === 'Solid Oak Dining Table';
     await Review.create({
       product: prod._id,
-      customer: r.customer || null,
+      customer: isDemoCustomer ? customerDoc?._id || null : null,
       name: r.name,
       rating: r.rating,
       title: r.title,
       body: r.body,
-      verified: !!r.customer,
+      verified: isDemoCustomer,
     });
     await Review.syncProductRating(prod._id);
   }

@@ -133,10 +133,10 @@ export default function Shop() {
         </div>
       )}
 
-      {/* Colour */}
+      {/* Finish */}
       {facets.colors.length > 0 && (
         <div>
-          <h3 className="eyebrow mb-4">Colour</h3>
+          <h3 className="eyebrow mb-4">Finish</h3>
           <ul className="space-y-2.5">
             {facets.colors.map((c) => (
               <li key={c.name}>

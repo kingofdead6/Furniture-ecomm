@@ -11,7 +11,7 @@ export default function CartPage() {
     return (
       <div className="mx-auto max-w-[1400px] px-5 md:px-8">
         <EmptyState
-          title="Your bag is empty"
+          title="Your cart is empty"
           message="Once you add pieces you love, they'll appear here."
           action={{ to: "/products", label: "Start shopping" }}
         />
@@ -23,7 +23,7 @@ export default function CartPage() {
     <div className="mx-auto max-w-[1400px] px-5 py-12 md:px-8">
       <div className="border-b border-line pb-8">
         <p className="eyebrow">{count} {count === 1 ? "item" : "items"}</p>
-        <h1 className="display mt-2 text-[clamp(2.5rem,7vw,5rem)]">Shopping bag</h1>
+        <h1 className="display mt-2 text-[clamp(2.5rem,7vw,5rem)]">Shopping cart</h1>
       </div>
 
       <div className="grid gap-12 pt-10 lg:grid-cols-[1fr_360px]">

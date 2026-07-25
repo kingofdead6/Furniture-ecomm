@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, ShoppingBag, Shirt, Layers, Tag, Ticket,
+  LayoutDashboard, ShoppingBag, Armchair, Layers, Tag, Ticket,
   Users, Truck, Mail, UserCog, Menu, X, ArrowUpRight,
 } from "lucide-react";
 import { store } from "../../store.config.js";
@@ -12,7 +12,7 @@ import { useAuth } from "../../context/AuthContext";
 const NAV = [
   { to: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
-  { to: "/admin/products", label: "Products", icon: Shirt },
+  { to: "/admin/products", label: "Products", icon: Armchair },
   { to: "/admin/collections", label: "Collections", icon: Layers, super: true },
   { to: "/admin/categories", label: "Categories", icon: Tag, super: true },
   { to: "/admin/coupons", label: "Coupons", icon: Ticket, super: true },
