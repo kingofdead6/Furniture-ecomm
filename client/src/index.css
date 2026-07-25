@@ -243,3 +243,147 @@ a, button { transition: color 0.3s var(--ease), opacity 0.3s var(--ease); }
   .btn-solid::before, .btn-line::before { transition: none !important; animation: none !important; }
   .card-quick { opacity: 1; transform: none; }
 }
+
+/* ═════════════════════════════════════════════════════════════════════════════
+   EDITORIAL MOTION LAYER
+   Typographic reveals, cursor-led interaction and scroll depth. Every effect
+   degrades to a static, fully-readable page under prefers-reduced-motion.
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Masked word reveal — words rise out of an invisible baseline ── */
+@keyframes wordRise {
+  from { transform: translateY(105%) rotate(2deg); }
+  to   { transform: translateY(0) rotate(0); }
+}
+.split-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  /* room for descenders + italics so the mask never clips a glyph */
+  padding: 0.02em 0.06em 0.14em 0.02em;
+  margin: -0.02em -0.06em -0.14em -0.02em;
+}
+.split-inner {
+  display: inline-block;
+  transform: translateY(105%);
+  animation: wordRise 1s var(--ease) both;
+  will-change: transform;
+}
+
+/* ── Scroll-linked parallax (offset driven by JS custom property) ── */
+.parallax { will-change: transform; transform: translate3d(0, var(--py, 0px), 0); }
+
+/* ── Cursor-following image preview (category index) ── */
+.hover-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 260px;
+  height: 330px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-50%, -50%, 0) scale(0.92);
+  transition: opacity 0.45s var(--ease), transform 0.55s var(--ease);
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: 0 30px 60px -30px rgb(var(--ink-rgb) / 0.45);
+}
+.hover-preview.is-on { opacity: 1; transform: translate3d(-50%, -50%, 0) scale(1); }
+.hover-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Dim sibling rows so the hovered one leads (progressive: needs :has) */
+@supports selector(:has(*)) {
+  .peer-list:has(.peer-row:hover) .peer-row:not(:hover) { opacity: 0.38; }
+  .peer-row { transition: opacity 0.45s var(--ease), padding 0.45s var(--ease); }
+  .peer-list:has(.peer-row:hover) .peer-row:hover { padding-left: 0.75rem; }
+}
+
+/* ── Shop-the-room hotspots ── */
+.hotspot {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--bone);
+  color: var(--ink);
+  box-shadow: 0 6px 20px -6px rgb(var(--ink-rgb) / 0.5);
+  transform: translate(-50%, -50%);
+  transition: transform 0.4s var(--ease), background 0.3s, color 0.3s;
+  cursor: pointer;
+}
+.hotspot::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  border: 1px solid var(--bone);
+  opacity: 0.75;
+  animation: hotspotPulse 2.6s var(--ease) infinite;
+}
+@keyframes hotspotPulse {
+  0%   { transform: scale(0.85); opacity: 0.75; }
+  70%  { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.hotspot:hover, .hotspot.is-active {
+  transform: translate(-50%, -50%) scale(1.15);
+  background: var(--clay);
+  color: var(--bone);
+}
+.hotspot:hover::after, .hotspot.is-active::after { animation: none; opacity: 0; }
+
+.hotspot-card {
+  position: absolute;
+  z-index: 20;
+  width: 210px;
+  background: var(--bone);
+  transform: translate(-50%, calc(-100% - 26px)) translateY(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease), transform 0.5s var(--ease);
+  box-shadow: 0 26px 50px -24px rgb(var(--ink-rgb) / 0.55);
+}
+.hotspot-card.is-on {
+  opacity: 1;
+  transform: translate(-50%, calc(-100% - 26px)) translateY(0);
+  pointer-events: auto;
+}
+/* Markers near the top open downwards instead. */
+.hotspot-card.is-below { transform: translate(-50%, 26px) translateY(-6px); }
+.hotspot-card.is-below.is-on { transform: translate(-50%, 26px) translateY(0); }
+
+/* ── Scroll progress rule ── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(var(--sp, 0));
+  background: var(--clay);
+  z-index: 200;
+  pointer-events: none;
+}
+
+/* ── Magnetic button (offset set from JS) ── */
+.magnetic { transform: translate3d(var(--mx, 0px), var(--my, 0px), 0); }
+
+/* ── Editorial offset grid — deliberately breaks the even rhythm ── */
+@media (min-width: 768px) {
+  .grid-editorial > *:nth-child(4n + 2) { transform: translateY(3.5rem); }
+  .grid-editorial > *:nth-child(4n + 4) { transform: translateY(1.75rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .split-inner { transform: none; animation: none; }
+  .parallax { transform: none !important; }
+  .hover-preview { display: none; }
+  .hotspot::after { animation: none; }
+  .magnetic { transform: none !important; }
+  .grid-editorial > * { transform: none !important; }
+  .peer-list:has(.peer-row:hover) .peer-row:not(:hover) { opacity: 1; }
+}

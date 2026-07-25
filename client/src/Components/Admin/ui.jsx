@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useCountUp } from "../../lib/motion";
 
 // ── Page header ──────────────────────────────────────────────────────────────
 export function PageHeader({ eyebrow, title, count, action }) {
@@ -30,11 +31,18 @@ export function Button({ variant = "solid", className = "", ...rest }) {
 }
 
 // ── Stat card ────────────────────────────────────────────────────────────────
-export function StatCard({ label, value, sub }) {
+// Pass `numeric` (+ optional `format`) to have the figure count up when the
+// card scrolls into view; otherwise `value` renders as-is.
+export function StatCard({ label, value, sub, numeric, format }) {
+  const animated = typeof numeric === "number";
+  const [boxRef, valueRef] = useCountUp(animated ? numeric : 0, { format });
+
   return (
-    <div className="border border-line p-6">
+    <div ref={boxRef} className="hover-rise border border-line p-6 transition-colors hover:border-ink">
       <p className="eyebrow">{label}</p>
-      <p className="mt-3 font-display text-4xl">{value}</p>
+      <p className="mt-3 font-display text-4xl">
+        {animated ? <span ref={valueRef}>{format ? format(0) : 0}</span> : value}
+      </p>
       {sub && <p className="mt-1 text-xs text-muted">{sub}</p>}
     </div>
   );

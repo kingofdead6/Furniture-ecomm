@@ -49,10 +49,15 @@ export default function AdminDashboard() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard label="Revenue" value={formatPrice(revenue)} sub={`${orders.length} orders total`} />
-            <StatCard label="Pending orders" value={pending} sub="Awaiting confirmation" />
-            <StatCard label="Products" value={products.length} sub={`${lowStock} low on stock`} />
-            <StatCard label="Customers" value={superAdmin ? data.customers.length : "—"} sub={superAdmin ? "Registered accounts" : "Superadmin only"} />
+            <StatCard label="Revenue" numeric={revenue} format={formatPrice} sub={`${orders.length} orders total`} />
+            <StatCard label="Pending orders" numeric={pending} sub="Awaiting confirmation" />
+            <StatCard label="Products" numeric={products.length} sub={`${lowStock} low on stock`} />
+            <StatCard
+              label="Customers"
+              numeric={superAdmin ? data.customers.length : undefined}
+              value="—"
+              sub={superAdmin ? "Registered accounts" : "Superadmin only"}
+            />
           </div>
 
           {/* Status breakdown */}

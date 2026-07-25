@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./Components/Shared/NavBar";
 import Footer from "./Components/Shared/Footer";
 import ScrollToTop from "./Components/Shared/ScrollToTop";
+import ScrollProgress from "./Components/Shared/ScrollProgress";
 import ProtectedRoute from "./Components/Shared/ProtectedRoute";
 
 import HomePage from "./Pages/HomePage";
@@ -57,6 +58,7 @@ function Storefront() {
   const location = useLocation();
   return (
     <div className="flex min-h-screen flex-col">
+      <ScrollProgress />
       <Navbar />
       <main className="flex-1">
         <AnimatePresence mode="wait">

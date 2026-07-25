@@ -244,7 +244,7 @@ export default function Shop() {
             <>
               <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-3">
                 {products.map((p, i) => (
-                  <Reveal key={p._id} delay={(i % 3) * 60}>
+                  <Reveal key={p._id} delay={(i % 3) * 70}>
                     <ProductCard product={p} />
                   </Reveal>
                 ))}

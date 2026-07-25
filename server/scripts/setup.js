@@ -475,6 +475,13 @@ async function run() {
     return { url: pool || genericFallback(slugify(c.name), 0), public_id: null, alt: c.name };
   }
 
+  // Each category gets a verified photo of its own, used by the storefront's
+  // category index (the cursor-following hover preview).
+  function categoryImage(name) {
+    const pool = (IMAGE_POOLS[name] || []).map(unsplash).find((u) => working.has(u));
+    return { url: pool || genericFallback(slugify(name), 0), public_id: null };
+  }
+
   const productImages = new Map(PRODUCTS.map((p) => [p.name, imagesFor(p)]));
 
   // 3. Report image sourcing before touching the database.
@@ -527,7 +534,12 @@ async function run() {
   const catByName = {};
   for (let i = 0; i < CATEGORIES.length; i++) {
     const c = CATEGORIES[i];
-    const doc = await Category.create({ ...c, slug: slugify(c.name), order: i });
+    const doc = await Category.create({
+      ...c,
+      slug: slugify(c.name),
+      order: i,
+      image: categoryImage(c.name),
+    });
     catByName[c.name] = doc._id;
   }
   console.log(`  Seeded ${CATEGORIES.length} categories.`);
