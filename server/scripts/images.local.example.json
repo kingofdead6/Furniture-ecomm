@@ -1,0 +1,18 @@
+{
+  "_readme": [
+    "Optional photo overrides for scripts/setup.js.",
+    "Copy this file to 'images.local.json' (same folder) and edit it.",
+    "Keys are product names exactly as they appear in setup.js PRODUCTS.",
+    "Values are arrays of direct image URLs (first one is the main photo).",
+    "Every URL is still verified over the network before it is saved, and any",
+    "product listed here takes priority over the built-in photography.",
+    "Delete this _readme key in your real file."
+  ],
+  "Linen Three-Seater Sofa": [
+    "https://res.cloudinary.com/your-cloud/image/upload/v1/maison/linen-sofa-1.jpg",
+    "https://res.cloudinary.com/your-cloud/image/upload/v1/maison/linen-sofa-2.jpg"
+  ],
+  "Solid Oak Dining Table": [
+    "https://res.cloudinary.com/your-cloud/image/upload/v1/maison/oak-table-1.jpg"
+  ]
+}

@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Local photo overrides for scripts/setup.js (keep out of version control)
+scripts/images.local.json
